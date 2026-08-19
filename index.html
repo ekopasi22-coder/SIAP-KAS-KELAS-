@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buku Kas & Rekap Iuran Siswa Kelas VIII E</title>
+    <title>SIAP-KAS-KELAS | Buku Kas & Rekap Iuran VIII E</title>
     <!-- TailwindCSS & FontAwesome Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -76,7 +76,7 @@
         <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-2">
             <div>
                 <h1 class="text-xl font-bold flex items-center gap-2">
-                    <i class="fas fa-book-open text-amber-300"></i> Buku Kas & Rekap Iuran Kelas VIII E
+                    <i class="fas fa-book-open text-amber-300"></i> SIAP-KAS-KELAS • Buku Kas & Rekap Iuran Kelas VIII E
                 </h1>
                 <p class="text-xs text-teal-100">SMP Negeri 15 Balikpapan • Wali Kelas: Eko Dainur Utomo Pasi, S.Pd., Gr.</p>
             </div>
@@ -356,7 +356,7 @@
                 <div class="max-h-64 overflow-y-auto">
                     <table class="w-full text-xs">
                         <thead class="bg-slate-700 text-white sticky top-0">
-                            <tr><th class="p-2 text-center">No</th><th class="p-2 text-center">NIS</th><th class="p-2 text-left">Nama Siswa</th></tr>
+                            <tr><th class="p-2 text-center">No</th><th class="p-2 text-center">NIS</th><th class="p-2 text-left">Nama Siswa</th><th class="p-2 text-center">Aksi</th></tr>
                         </thead>
                         <tbody id="student-manager-tbody"></tbody>
                     </table>
@@ -966,7 +966,7 @@
         }
 
         function exportToExcel() {
-            if (!(isAdmin || isWaliKelas)) { alert("Download dokumen hanya untuk Admin/Bendahara."); return; }
+            if (!(isAdmin && !isWaliKelas)) { alert("Download dokumen hanya untuk Bendahara/Admin yang diberi hak download."); return; }
             let csv = "No;Tanggal;NIS;Nama Siswa / Subjek;Keterangan;Pemasukan (Rp);Pengeluaran (Rp)\n";
             transactions.forEach((t, index) => {
                 csv += `${index + 1};"${t.date}";"${t.nis}";"${t.name}";"${t.desc}";${t.in};${t.out}\n`;
@@ -982,7 +982,7 @@
         }
 
         function exportWeeklyIuranToExcel() {
-            if (!(isAdmin || isWaliKelas)) { alert("Download dokumen hanya untuk Admin/Bendahara."); return; }
+            if (!(isAdmin && !isWaliKelas)) { alert("Download dokumen hanya untuk Bendahara/Admin yang diberi hak download."); return; }
             const selectedMonthKey = document.getElementById('month-filter').value;
             const selectEl = document.getElementById('month-filter');
             const selectedMonthLabel = selectEl.options[selectEl.selectedIndex] ? selectEl.options[selectEl.selectedIndex].text : "-";
@@ -1020,7 +1020,7 @@
         }
 
         function exportWeeklyIuranToPDF() {
-            if (!(isAdmin || isWaliKelas)) { alert("Download dokumen hanya untuk Admin/Bendahara."); return; }
+            if (!(isAdmin && !isWaliKelas)) { alert("Download dokumen hanya untuk Bendahara/Admin yang diberi hak download."); return; }
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'mm', 'a4');
 
@@ -1198,19 +1198,29 @@
   function updateDocumentDownloadAccess() {
     const loggedIn = !!isAdmin;
     const isWali = !!isWaliKelas;
+    const isBendahara = loggedIn && !isWali;
 
-    // Existing report buttons.
-    const ids = [
-      "student-download-btn",
-      "student-template-btn",
-      "btn-print-full",
-      "btn-export-excel",
-      "btn-export-iuran-excel",
-      "btn-export-iuran-pdf"
-    ];
-    ids.forEach(id => {
+    // CETAK: Wali Kelas dan Bendahara tetap boleh mencetak.
+    const printIds = ["btn-print-full", "role-print-btn"];
+    printIds.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.classList.toggle("hidden", !loggedIn);
+    });
+
+    // DOWNLOAD: tidak ditampilkan untuk Wali Kelas.
+    // Pada sistem ini jalur download diberikan kepada Bendahara.
+    const downloadIds = [
+      "student-download-btn",
+      "student-template-btn",
+      "btn-export-excel",
+      "btn-export-iuran-excel",
+      "btn-export-iuran-pdf",
+      "role-report-pdf-btn",
+      "role-report-csv-btn"
+    ];
+    downloadIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle("hidden", !isBendahara);
     });
 
     // Main student manager is Wali Kelas only.
@@ -1272,10 +1282,44 @@
     tbody.innerHTML = "";
     activeStudents.forEach((s,i) => {
       tbody.insertAdjacentHTML("beforeend",
-        `<tr class="border-b border-slate-100"><td class="p-2 text-center">${i+1}</td><td class="p-2 text-center font-mono">${escapeStudentHtml(s.nis)}</td><td class="p-2 font-medium">${escapeStudentHtml(s.name)}</td></tr>`);
+        `<tr class="border-b border-slate-100"><td class="p-2 text-center">${i+1}</td><td class="p-2 text-center font-mono">${escapeStudentHtml(s.nis)}</td><td class="p-2 font-medium">${escapeStudentHtml(s.name)}</td><td class="p-2 text-center"><button type="button" onclick="deleteStudentManual(${i})" class="px-2 py-1 rounded-lg bg-rose-50 text-rose-600 font-bold text-xs hover:bg-rose-100">Hapus</button></td></tr>`);
     });
     const label = document.getElementById("student-count-label");
     if (label) label.innerText = `${activeStudents.length} siswa aktif`;
+  }
+
+  async function deleteStudentManual(index) {
+    if (!isWaliKelas) {
+      alert("Hapus siswa hanya dapat dilakukan oleh Wali Kelas.");
+      return;
+    }
+
+    const student = activeStudents[index];
+    if (!student) return;
+
+    const ok = confirm(`Hapus siswa "${student.name}" (${student.nis}) dari daftar siswa aktif?\n\nData transaksi kas siswa tidak ikut dihapus.`);
+    if (!ok) return;
+
+    // Simpan daftar aktif lama ke arsip sebelum menghapus satu siswa.
+    const ars = getStudentArchives();
+    ars.unshift({
+      id: Date.now(),
+      name: `Arsip sebelum menghapus ${student.name}`,
+      createdAt: new Date().toISOString(),
+      students: activeStudents.map(s => ({...s}))
+    });
+    saveStudentArchives(ars);
+
+    activeStudents.splice(index, 1);
+    saveActiveStudentsLocal();
+
+    if (typeof simpanSiswaKeFirebase === "function") {
+      await simpanSiswaKeFirebase();
+    }
+
+    updateArchiveSelect();
+    updateStudentManagerTable();
+    alert(`✅ ${student.name} sudah dihapus dari daftar siswa aktif.\nData transaksi kas tetap tersimpan.`);
   }
 
   async function addStudentManual() {
@@ -1513,9 +1557,9 @@
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
   }
 
-  function downloadCurrentStudents() { if (!(isAdmin || isWaliKelas)) { alert("Download dokumen hanya untuk Admin/Bendahara."); return; } downloadStudentCSV(activeStudents,"Daftar_Siswa_Aktif_VIII_E.csv"); }
+  function downloadCurrentStudents() { if (!(isAdmin && !isWaliKelas)) { alert("Download dokumen hanya untuk Bendahara/Admin yang diberi hak download."); return; } downloadStudentCSV(activeStudents,"Daftar_Siswa_Aktif_VIII_E.csv"); }
   function downloadStudentTemplate() {
-    if (!(isAdmin || isWaliKelas)) { alert("Download dokumen hanya untuk Admin/Bendahara."); return; }
+    if (!(isAdmin && !isWaliKelas)) { alert("Download dokumen hanya untuk Bendahara/Admin yang diberi hak download."); return; }
     downloadStudentCSV([{nis:"6251",name:"Contoh Nama Siswa 1"},{nis:"6252",name:"Contoh Nama Siswa 2"}],"Template_Upload_Nama_Siswa.csv");
   }
 
