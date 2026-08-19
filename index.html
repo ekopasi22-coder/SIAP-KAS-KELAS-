@@ -59,6 +59,8 @@
             }
         }
     </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 pb-12">
@@ -1129,6 +1131,12 @@
 
         // Inisialisasi Aplikasi Saat Halaman Dimuat
         window.onload = async function() {
+            // Tunggu autentikasi Firebase agar perangkat lain dapat membaca database
+            // yang dilindungi Rules: auth != null.
+            if (typeof firebaseAuthReady !== 'undefined') {
+                await firebaseAuthReady;
+            }
+
             // Firebase menjadi sumber data utama saat aplikasi dibuka.
             if (typeof muatDataDariFirebase === 'function') {
                 await muatDataDariFirebase();
@@ -1567,10 +1575,70 @@
 </script>
 <!-- Script Firebase Kas Kelas 8E (Sinkronisasi Aman & Terarah) -->
 <script>
+  // ================================================================
+  // FIREBASE AUTH: LOGIN ANONIM OTOMATIS
+  // ================================================================
+  // CATATAN: Ganti nilai FIREBASE_API_KEY dengan Web API Key dari
+  // Firebase Console > Project settings > General > Your apps > Config.
+  // Anonymous Authentication juga harus diaktifkan di:
+  // Authentication > Sign-in method > Anonymous > Enable.
+  const FIREBASE_API_KEY = "AIzaSyBv5hVGQts3w7UAXtS0mhYiQwIXEN9fk_0";
+  const FIREBASE_PROJECT_ID = "kas-kelas-8e";
+  const FIREBASE_AUTH_DOMAIN = FIREBASE_PROJECT_ID + ".firebaseapp.com";
+
+  let firebaseUser = null;
+  let firebaseAuthReadyResolve;
+  let firebaseAuthReadyReject;
+  const firebaseAuthReady = new Promise((resolve, reject) => {
+    firebaseAuthReadyResolve = resolve;
+    firebaseAuthReadyReject = reject;
+  });
+
+  async function initFirebaseAuth() {
+    try {
+      if (FIREBASE_API_KEY === "GANTI_DENGAN_WEB_API_KEY_FIREBASE") {
+        throw new Error("Web API Key Firebase belum diisi.");
+      }
+
+      if (!firebase.apps.length) {
+        firebase.initializeApp({
+          apiKey: FIREBASE_API_KEY,
+          authDomain: FIREBASE_AUTH_DOMAIN,
+          projectId: FIREBASE_PROJECT_ID
+        });
+      }
+
+      firebase.auth().onAuthStateChanged(async (user) => {
+        if (user) {
+          firebaseUser = user;
+          firebaseAuthReadyResolve(user);
+          console.log("Firebase Auth siap:", user.uid);
+        }
+      });
+
+      if (!firebase.auth().currentUser) {
+        await firebase.auth().signInAnonymously();
+      }
+    } catch (err) {
+      console.error("Firebase Auth gagal:", err);
+      firebaseAuthReadyReject(err);
+      alert("Koneksi database belum siap. Pastikan Anonymous Authentication Firebase sudah diaktifkan dan Web API Key sudah benar.");
+    }
+  }
+
+  async function getFirebaseAuthedUrl(baseUrl = FIREBASE_URL) {
+    if (!firebase.auth().currentUser) {
+      await firebase.auth().signInAnonymously();
+    }
+    const token = await firebase.auth().currentUser.getIdToken(true);
+    return baseUrl + (baseUrl.includes("?") ? "&" : "?") + "auth=" + encodeURIComponent(token);
+  }
+
+  initFirebaseAuth();
+
   const FIREBASE_URL = "https://kas-kelas-8e-default-rtdb.asia-southeast1.firebasedatabase.app/kas_kelas_full.json";
 
-  // Hanya tiga data aplikasi ini yang disinkronkan.
-  // LocalStorage tidak lagi dikirim seluruhnya ke Firebase.
+  // Hanya data aplikasi ini yang disinkronkan.
   const FIREBASE_KEYS = {
     data: "kas_viiie_data",
     treasurers: "kas_viiie_treasurers",
@@ -1584,7 +1652,8 @@
 
   async function simpanSiswaKeFirebase() {
     try {
-      const response = await fetch(FIREBASE_URL, {
+      const url = await getFirebaseAuthedUrl();
+      const response = await fetch(url, {
         method:"PATCH", headers:{"Content-Type":"application/json"},
         body:JSON.stringify({[FIREBASE_STUDENT_KEY]:activeStudents})
       });
@@ -1594,7 +1663,8 @@
 
   async function simpanArsipSiswaKeFirebase(archives) {
     try {
-      const response = await fetch(FIREBASE_URL, {
+      const url = await getFirebaseAuthedUrl();
+      const response = await fetch(url, {
         method:"PATCH", headers:{"Content-Type":"application/json"},
         body:JSON.stringify({[FIREBASE_ARCHIVE_KEY]:archives})
       });
@@ -1602,17 +1672,14 @@
     } catch(e) { console.error("Gagal simpan arsip:",e); }
   }
 
-
   function jsonStringifySafe(value) {
     return JSON.stringify(value);
   }
 
-  // Ambil data dari Firebase. Jika Firebase memiliki data, data cloud
-  // menjadi sumber utama dan disalin ke LocalStorage agar aplikasi lama
-  // tetap bekerja tanpa perlu dirombak seluruhnya.
   async function muatDataDariFirebase() {
     try {
-      const response = await fetch(FIREBASE_URL, { cache: "no-store" });
+      const url = await getFirebaseAuthedUrl();
+      const response = await fetch(url, { cache: "no-store" });
       if (!response.ok) throw new Error("HTTP " + response.status);
 
       const dataFirebase = await response.json();
@@ -1620,28 +1687,16 @@
       if (dataFirebase && typeof dataFirebase === "object") {
         if (Object.prototype.hasOwnProperty.call(dataFirebase, FIREBASE_KEYS.data)) {
           const cloudData = Array.isArray(dataFirebase[FIREBASE_KEYS.data])
-            ? dataFirebase[FIREBASE_KEYS.data]
-            : [];
-          if (cloudData.length > 0 || transactions.length === 0) {
-            localStorage.setItem(FIREBASE_KEYS.data, jsonStringifySafe(cloudData));
-            transactions = cloudData;
-          } else {
-            console.warn("Cloud kas kosong, data lokal dipertahankan.");
-            setTimeout(() => simpanDataKeFirebase(), 0);
-          }
+            ? dataFirebase[FIREBASE_KEYS.data] : [];
+          localStorage.setItem(FIREBASE_KEYS.data, jsonStringifySafe(cloudData));
+          transactions = cloudData;
         }
 
         if (Object.prototype.hasOwnProperty.call(dataFirebase, FIREBASE_KEYS.treasurers)) {
           const cloudTreasurers = Array.isArray(dataFirebase[FIREBASE_KEYS.treasurers])
-            ? dataFirebase[FIREBASE_KEYS.treasurers]
-            : [];
-          if (cloudTreasurers.length > 0 || activeTreasurers.length === 0) {
-            localStorage.setItem(FIREBASE_KEYS.treasurers, jsonStringifySafe(cloudTreasurers));
-            activeTreasurers = cloudTreasurers;
-          } else {
-            console.warn("Cloud bendahara kosong, daftar lokal dipertahankan.");
-            setTimeout(() => simpanBendaharaKeFirebase(), 0);
-          }
+            ? dataFirebase[FIREBASE_KEYS.treasurers] : [];
+          localStorage.setItem(FIREBASE_KEYS.treasurers, jsonStringifySafe(cloudTreasurers));
+          activeTreasurers = cloudTreasurers;
         }
 
         if (Object.prototype.hasOwnProperty.call(dataFirebase, FIREBASE_KEYS.pin)) {
@@ -1653,19 +1708,14 @@
         }
       }
 
-
       if (Object.prototype.hasOwnProperty.call(dataFirebase, FIREBASE_STUDENT_KEY)) {
         const cloudStudents = Array.isArray(dataFirebase[FIREBASE_STUDENT_KEY]) ? dataFirebase[FIREBASE_STUDENT_KEY] : [];
-        if (cloudStudents.length > 0) {
+        if (cloudStudents.length) {
           activeStudents = cloudStudents.filter(s=>s && String(s.name||"").trim())
             .map(s=>({nis:String(s.nis||"-"),name:String(s.name).trim()}));
           localStorage.setItem(STUDENT_KEY, JSON.stringify(activeStudents));
           syncActiveStudentsToMaster();
-        } else if (activeStudents.length > 0) {
-          setTimeout(() => simpanSiswaKeFirebase(), 0);
         }
-      } else if (activeStudents.length > 0) {
-        setTimeout(() => simpanSiswaKeFirebase(), 0);
       }
 
       if (Object.prototype.hasOwnProperty.call(dataFirebase, FIREBASE_ARCHIVE_KEY)) {
@@ -1681,25 +1731,19 @@
     }
   }
 
-  // Tulis HANYA data transaksi ke Firebase.
   async function simpanDataKeFirebase() {
     if (firebaseSyncInProgress) return;
     firebaseSyncInProgress = true;
-
     try {
-      const payload = {
-        [FIREBASE_KEYS.data]: transactions
-      };
-
-      const response = await fetch(FIREBASE_URL, {
+      const url = await getFirebaseAuthedUrl();
+      const payload = {[FIREBASE_KEYS.data]: transactions};
+      const response = await fetch(url, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-
       if (!response.ok) throw new Error("HTTP " + response.status);
       firebaseReady = true;
-      console.log("Data transaksi berhasil disimpan ke Firebase.");
     } catch (err) {
       console.error("Gagal menyimpan transaksi ke Firebase:", err);
     } finally {
@@ -1707,138 +1751,101 @@
     }
   }
 
-  // Tulis HANYA daftar bendahara.
   async function simpanBendaharaKeFirebase() {
     try {
-      const response = await fetch(FIREBASE_URL, {
+      const url = await getFirebaseAuthedUrl();
+      const response = await fetch(url, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          [FIREBASE_KEYS.treasurers]: activeTreasurers
-        })
+        body: JSON.stringify({[FIREBASE_KEYS.treasurers]: activeTreasurers})
       });
-
       if (!response.ok) throw new Error("HTTP " + response.status);
-      console.log("Daftar bendahara berhasil disimpan ke Firebase.");
-    } catch (err) {
-      console.error("Gagal menyimpan bendahara ke Firebase:", err);
-    }
+    } catch (err) { console.error("Gagal menyimpan bendahara ke Firebase:", err); }
   }
 
-  // Tulis HANYA PIN.
   async function simpanPinKeFirebase() {
     try {
-      const response = await fetch(FIREBASE_URL, {
+      const url = await getFirebaseAuthedUrl();
+      const response = await fetch(url, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          [FIREBASE_KEYS.pin]: currentPin
-        })
+        body: JSON.stringify({[FIREBASE_KEYS.pin]: currentPin})
       });
-
       if (!response.ok) throw new Error("HTTP " + response.status);
-      console.log("PIN berhasil disimpan ke Firebase.");
-    } catch (err) {
-      console.error("Gagal menyimpan PIN ke Firebase:", err);
-    }
+    } catch (err) { console.error("Gagal menyimpan PIN ke Firebase:", err); }
   }
 
-  // Pantau perubahan dari perangkat lain secara realtime.
-  // Tidak lagi reload halaman setiap ada event; tabel langsung diperbarui.
-  try {
-    const eventSource = new EventSource(FIREBASE_URL);
+  // Realtime stream memakai token Firebase Auth.
+  let eventSource = null;
+  async function startFirebaseRealtime() {
+    try {
+      const url = await getFirebaseAuthedUrl();
+      if (eventSource) eventSource.close();
+      eventSource = new EventSource(url);
 
-    eventSource.onmessage = function(event) {
-      try {
-        const data = JSON.parse(event.data);
-        if (!data || typeof data !== "object") return;
+      eventSource.onmessage = function(event) {
+        try {
+          const data = JSON.parse(event.data);
+          if (!data || typeof data !== "object") return;
+          let changed = false;
 
-        let changed = false;
-
-        if (Object.prototype.hasOwnProperty.call(data, FIREBASE_KEYS.data)) {
-          const cloudData = Array.isArray(data[FIREBASE_KEYS.data])
-            ? data[FIREBASE_KEYS.data]
-            : [];
-          const oldData = localStorage.getItem(FIREBASE_KEYS.data);
-          const localData = Array.isArray(transactions) ? transactions : [];
-          const newData = JSON.stringify(cloudData);
-          if (cloudData.length > 0 || localData.length === 0) {
-            if (oldData !== newData) {
+          if (Object.prototype.hasOwnProperty.call(data, FIREBASE_KEYS.data)) {
+            const cloudData = Array.isArray(data[FIREBASE_KEYS.data]) ? data[FIREBASE_KEYS.data] : [];
+            const newData = JSON.stringify(cloudData);
+            if (localStorage.getItem(FIREBASE_KEYS.data) !== newData) {
               localStorage.setItem(FIREBASE_KEYS.data, newData);
-              transactions = cloudData;
-              changed = true;
+              transactions = cloudData; changed = true;
             }
-          } else {
-            setTimeout(() => simpanDataKeFirebase(), 0);
           }
-        }
 
-        if (Object.prototype.hasOwnProperty.call(data, FIREBASE_KEYS.treasurers)) {
-          const cloudTreasurers = Array.isArray(data[FIREBASE_KEYS.treasurers])
-            ? data[FIREBASE_KEYS.treasurers]
-            : [];
-
-          const newTreasurers = JSON.stringify(cloudTreasurers);
-          if (localStorage.getItem(FIREBASE_KEYS.treasurers) !== newTreasurers) {
-            localStorage.setItem(FIREBASE_KEYS.treasurers, newTreasurers);
-            activeTreasurers = cloudTreasurers;
-            changed = true;
+          if (Object.prototype.hasOwnProperty.call(data, FIREBASE_KEYS.treasurers)) {
+            const cloudTreasurers = Array.isArray(data[FIREBASE_KEYS.treasurers]) ? data[FIREBASE_KEYS.treasurers] : [];
+            const newTreasurers = JSON.stringify(cloudTreasurers);
+            if (localStorage.getItem(FIREBASE_KEYS.treasurers) !== newTreasurers) {
+              localStorage.setItem(FIREBASE_KEYS.treasurers, newTreasurers);
+              activeTreasurers = cloudTreasurers; changed = true;
+            }
           }
-        }
 
-        if (Object.prototype.hasOwnProperty.call(data, FIREBASE_KEYS.pin)) {
-          const cloudPin = String(data[FIREBASE_KEYS.pin] ?? "");
-          if (cloudPin && localStorage.getItem(FIREBASE_KEYS.pin) !== cloudPin) {
-            localStorage.setItem(FIREBASE_KEYS.pin, cloudPin);
-            currentPin = cloudPin;
+          if (Object.prototype.hasOwnProperty.call(data, FIREBASE_KEYS.pin)) {
+            const cloudPin = String(data[FIREBASE_KEYS.pin] ?? "");
+            if (cloudPin && localStorage.getItem(FIREBASE_KEYS.pin) !== cloudPin) {
+              localStorage.setItem(FIREBASE_KEYS.pin, cloudPin); currentPin = cloudPin;
+            }
           }
-        }
 
-
-        if (Object.prototype.hasOwnProperty.call(data, FIREBASE_STUDENT_KEY)) {
-          const cloudRealtimeStudents = Array.isArray(data[FIREBASE_STUDENT_KEY]) ? data[FIREBASE_STUDENT_KEY] : [];
-          const newStudents = JSON.stringify(cloudRealtimeStudents);
-          if (cloudRealtimeStudents.length > 0) {
+          if (Object.prototype.hasOwnProperty.call(data, FIREBASE_STUDENT_KEY)) {
+            const cloudStudents = Array.isArray(data[FIREBASE_STUDENT_KEY]) ? data[FIREBASE_STUDENT_KEY] : [];
+            const newStudents = JSON.stringify(cloudStudents);
             if (localStorage.getItem(STUDENT_KEY) !== newStudents) {
               localStorage.setItem(STUDENT_KEY, newStudents);
-              activeStudents = cloudRealtimeStudents.filter(s=>s && String(s.name||"").trim())
+              activeStudents = cloudStudents.filter(s=>s && String(s.name||"").trim())
                 .map(s=>({nis:String(s.nis||"-"),name:String(s.name).trim()}));
-              syncActiveStudentsToMaster();
-              changed = true;
+              syncActiveStudentsToMaster(); changed = true;
             }
-          } else if (activeStudents.length > 0) {
-            setTimeout(() => simpanSiswaKeFirebase(), 0);
           }
-        } else if (activeStudents.length > 0) {
-          setTimeout(() => simpanSiswaKeFirebase(), 0);
-        }
 
-        if (Object.prototype.hasOwnProperty.call(data, FIREBASE_ARCHIVE_KEY)) {
-          const cloudRealtimeArchives = Array.isArray(data[FIREBASE_ARCHIVE_KEY]) ? data[FIREBASE_ARCHIVE_KEY] : [];
-          localStorage.setItem(ARCHIVE_KEY, JSON.stringify(cloudRealtimeArchives));
-          if (document.getElementById("student-manager-modal") &&
-              !document.getElementById("student-manager-modal").classList.contains("hidden")) {
-            updateArchiveSelect();
+          if (Object.prototype.hasOwnProperty.call(data, FIREBASE_ARCHIVE_KEY)) {
+            const cloudArchives = Array.isArray(data[FIREBASE_ARCHIVE_KEY]) ? data[FIREBASE_ARCHIVE_KEY] : [];
+            localStorage.setItem(ARCHIVE_KEY, JSON.stringify(cloudArchives));
+            if (document.getElementById("student-manager-modal") && !document.getElementById("student-manager-modal").classList.contains("hidden")) updateArchiveSelect();
           }
-        }
 
-        if (changed && typeof updateMonthSelectorOptions === "function") {
-          updateMonthSelectorOptions();
-          renderKasJournal();
-          renderRekapTable();
-          calculateKPI();
-        }
-      } catch (err) {
-        console.error("Realtime Firebase error:", err);
-      }
-    };
+          if (changed && typeof updateMonthSelectorOptions === "function") {
+            updateMonthSelectorOptions(); renderKasJournal(); renderRekapTable(); calculateKPI();
+            if (typeof updateStudentManagerTable === "function") updateStudentManagerTable();
+          }
+        } catch (err) { console.error("Realtime Firebase error:", err); }
+      };
 
-    eventSource.onerror = function() {
-      console.warn("Koneksi realtime Firebase terputus sementara. Browser akan mencoba menyambung kembali.");
-    };
-  } catch (err) {
-    console.error("EventSource Firebase tidak tersedia:", err);
+      eventSource.onerror = function() {
+        console.warn("Realtime Firebase terputus. Mencoba autentikasi ulang...");
+        setTimeout(startFirebaseRealtime, 3000);
+      };
+    } catch (err) { console.error("Gagal memulai realtime Firebase:", err); }
   }
+
+  firebaseAuthReady.then(() => startFirebaseRealtime()).catch(()=>{});
 </script>
 
 </body>
