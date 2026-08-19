@@ -1,121 +1,1852 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal Eko Dainur Utomo Pasi, S.Pd.</title>
-<style>
-*{box-sizing:border-box}
-body{
-  margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  background:linear-gradient(135deg,#071a2d,#0b3b55 55%,#0d6472);color:#fff;min-height:100vh
-}
-.wrap{max-width:1100px;margin:auto;padding:28px 18px 35px}
-.hero{text-align:center;padding:28px 10px 25px}
-.badge{display:inline-block;padding:7px 14px;border:1px solid #ffffff38;border-radius:999px;background:#ffffff12;font-size:13px}
-h1{font-size:clamp(28px,6vw,52px);margin:18px 0 6px;letter-spacing:-1px}
-.subtitle{font-size:clamp(16px,3vw,21px);opacity:.85}
-.school{margin-top:8px;font-weight:700;letter-spacing:.8px}
-.datetime{margin-top:18px;font-size:14px;opacity:.72}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:15px}
-.card{
-  min-height:175px;border:1px solid #ffffff20;border-radius:22px;padding:24px;
-  background:#ffffff10;backdrop-filter:blur(12px);box-shadow:0 15px 35px #00000020;
-  transition:.2s;display:flex;flex-direction:column;justify-content:space-between
-}
-.card:hover{transform:translateY(-4px);background:#ffffff17}
-.icon{font-size:38px}.title{font-size:21px;font-weight:800;margin-top:10px}.desc{opacity:.72;font-size:14px;line-height:1.5;margin-top:6px}
-.btn{
-  display:inline-block;margin-top:18px;padding:11px 15px;border-radius:12px;
-  background:#ffffff18;border:1px solid #ffffff25;color:#fff;text-decoration:none;font-weight:700;text-align:center
-}
-.btn:hover{background:#ffffff28}
-.section{margin:28px 0 12px;font-size:15px;font-weight:800;letter-spacing:.5px;opacity:.85}
-footer{text-align:center;margin-top:35px;padding-top:20px;border-top:1px solid #ffffff18;font-size:13px;opacity:.65}
-@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:520px){.wrap{padding:18px 13px 25px}.grid{grid-template-columns:1fr}.card{min-height:150px}}
-</style>
-
-<style>
-@media(max-width:520px){
-  .wrap{padding:14px 10px 22px}
-  .hero{padding:22px 8px 20px}
-  .badge{font-size:11px;padding:6px 11px}
-  h1{font-size:clamp(27px,8vw,40px);margin:14px 0 5px}
-  .subtitle{font-size:clamp(14px,4.2vw,18px)}
-  .school{font-size:clamp(12px,3.5vw,15px);white-space:nowrap;letter-spacing:.2px}
-  .datetime{font-size:12px;margin-top:12px}
-  .grid{grid-template-columns:1fr;gap:12px;margin-top:12px}
-  .card{min-height:150px;padding:14px;border-radius:17px}
-  .icon{font-size:28px}
-  .title{font-size:15px;line-height:1.1}
-  .desc{font-size:11px;line-height:1.35}
-  .btn{font-size:11px;padding:8px 9px;margin-top:10px}
-  footer{margin-top:20px;padding-top:14px;font-size:11px}
-}
-@media(max-width:370px){
-  .grid{gap:8px}
-  .card{min-height:140px;padding:12px}
-  .title{font-size:14px}
-  .desc{font-size:10px}
-  .btn{font-size:10px;padding:7px 8px}
-}
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIAP-KAS-KELAS | Buku Kas & Rekap Iuran VIII E</title>
+    <!-- TailwindCSS & FontAwesome Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Library untuk Cetak PDF (jsPDF & AutoTable) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    
+    <style>
+        /* CSS Khusus Cetak / Print Browser */
+        @media print {
+            body {
+                background-color: white !important;
+                color: black !important;
+                padding-bottom: 0 !important;
+            }
+            header, #access-banner, #admin-form-container, #action-buttons, .admin-col, #login-modal, #change-pin-modal, #manage-treasurer-modal, #search-kas, #search-rekap, #month-selector-container {
+                display: none !important;
+            }
+            .print-header {
+                display: block !important;
+                text-align: center;
+                margin-bottom: 20px;
+                border-bottom: 2px solid #000;
+                padding-bottom: 10px;
+            }
+            .max-w-6xl {
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .shadow-sm, .border {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+            }
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                page-break-inside: auto;
+            }
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+            th, td {
+                border: 1px solid #333 !important;
+                padding: 5px 6px !important;
+                font-size: 10px !important;
+            }
+            thead {
+                background-color: #f1f5f9 !important;
+                color: black !important;
+            }
+        }
+    </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
-<body>
-<div class="wrap">
-  <header class="hero">
-    <span class="badge">PORTAL GURU</span>
-    <h1>SELAMAT DATANG</h1>
-    <div class="subtitle"><strong>EKO DAINUR UTOMO PASI, S.Pd.</strong></div>
-    <div class="school">SMP NEGERI 15 BALIKPAPAN</div>
-    <div class="datetime" id="datetime"></div>
-  </header>
+<body class="bg-slate-50 font-sans text-slate-800 pb-12">
 
-  <div class="section">APLIKASI UTAMA</div>
-  <main class="grid">
-    <article class="card">
-      <div><div class="icon">🏃</div><div class="title">SIAP PJOK</div>
-      <div class="desc">Presensi, jurnal mengajar, penilaian, KKTP, analisis dan perangkat PJOK.</div></div>
-      <a class="btn" href="#" onclick="openApp('https://ekopasi22-coder.github.io/SIAP-PJOK-SMPN15');return false">Buka SIAP PJOK →</a>
-    </article>
+    <!-- Header Cetak Print Window -->
+    <div class="print-header hidden">
+        <h1 class="text-xl font-bold uppercase tracking-wide">Laporan Buku Kas & Rekap Iuran Siswa Kelas VIII E</h1>
+        <h2 class="text-base font-semibold">SMP Negeri 15 Balikpapan</h2>
+        <p class="text-xs text-slate-600 mt-0.5">Wali Kelas: Eko Dainur Utomo Pasi, S.Pd., Gr. (NIP. 198812222022211003)</p>
+        <p class="text-xs text-slate-500 mt-1">Periode: <span id="print-month-label"></span> | Dicetak pada: <span id="print-date"></span></p>
+    </div>
 
-    <article class="card">
-      <div><div class="icon">👥</div><div class="title">MANAJEMEN KELAS</div>
-      <div class="desc">Data siswa, kehadiran dan administrasi kelas.</div></div>
-      <a class="btn" href="https://ekopasi22-coder.github.io/DAINUR-UP-CLASS">Buka Aplikasi →</a>
-    </article>
+    <!-- Header / Navigasi Utama -->
+    <header class="bg-teal-700 text-white shadow-md p-4 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-2">
+            <div>
+                <h1 class="text-xl font-bold flex items-center gap-2">
+                    <i class="fas fa-book-open text-amber-300"></i> SIAP-KAS-KELAS • Buku Kas & Rekap Iuran Kelas VIII E
+                </h1>
+                <p class="text-xs text-teal-100">SMP Negeri 15 Balikpapan • Wali Kelas: Eko Dainur Utomo Pasi, S.Pd., Gr.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span id="role-badge" class="bg-teal-800 text-teal-100 text-xs px-3 py-1.5 rounded-full border border-teal-600 font-medium">
+                    <i class="fas fa-eye mr-1"></i> Mode Siswa (Hanya Lihat)
+                </span>
+                <button id="auth-btn" onclick="toggleAuth()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold text-xs px-3 py-1.5 rounded-lg transition-all shadow-sm flex items-center gap-1">
+                    <i class="fas fa-lock" id="auth-icon"></i> <span id="auth-btn-text">Login Pengurus</span>
+                </button>
+            </div>
+        </div>
+    </header>
 
-    <article class="card">
-      <div><div class="icon">💰</div><div class="title">MANAJEMEN KAS KELAS</div>
-      <div class="desc">Kas masuk, pengeluaran, saldo dan laporan kas kelas.</div></div>
-      <a class="btn" href="https://ekopasi22-coder.github.io/SIAP-KAS-KELAS-/">Buka Aplikasi →</a>
-    </article>
+    <div class="max-w-6xl mx-auto p-4 space-y-6 mt-2">
 
-    <article class="card">
-      <div><div class="icon">🗂️</div><div class="title">DOKUMEN & ARSIP</div>
-      <div class="desc">Tempat menuju dokumen dan arsip administrasi yang digunakan.</div></div>
-      <a class="btn" href="#" onclick="placeholder('Dokumen & Arsip');return false">Buka Aplikasi →</a>
-    </article>
-  </main>
+        <!-- Banner Informasi Hak Akses -->
+        <div id="access-banner" class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg shadow-sm flex items-start gap-3">
+            <i class="fas fa-info-circle text-blue-500 text-lg mt-0.5"></i>
+            <div>
+                <p class="text-xs font-bold text-blue-800">Hak Akses Terbatas & Transparansi Publik</p>
+                <p class="text-xs text-blue-700 mt-0.5">Siswa & Orang Tua dapat melihat seluruh jurnal kas dan rekapitulasi iuran siswa secara utuh. Form input transaksi hanya terbuka untuk **Wali Kelas (Eko Dainur Utomo Pasi, S.Pd., Gr.)** atau **Bendahara Kelas** yang sah.</p>
+            </div>
+        </div>
 
-  <footer>
-    Portal Manajemen Pembelajaran & Kelas<br>
-    Dainur UP • SMP Negeri 15 Balikpapan
-  </footer>
-</div>
+        <!-- Ringkasan Kas (KPI Cards) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <p class="text-xs font-semibold text-slate-500 uppercase">Total Pemasukan Kas</p>
+                <p id="kpi-pemasukan" class="text-2xl font-bold text-teal-700 mt-1">Rp 0</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <p class="text-xs font-semibold text-slate-500 uppercase">Total Pengeluaran Kas</p>
+                <p id="kpi-pengeluaran" class="text-2xl font-bold text-rose-600 mt-1">Rp 0</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <p class="text-xs font-semibold text-slate-500 uppercase">Saldo Kas Saat Ini</p>
+                <p id="kpi-saldo" class="text-2xl font-bold text-emerald-600 mt-1">Rp 0</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <p class="text-xs font-semibold text-slate-500 uppercase">Total Transaksi</p>
+                <p id="kpi-trans-count" class="text-2xl font-bold text-amber-600 mt-1">0 Data</p>
+            </div>
+        </div>
 
+        <!-- Menu Tombol Aksi & Unduhan -->
+        <div id="role-action-bar" class="hidden mb-3 p-3 rounded-xl border border-slate-200 bg-slate-50 flex flex-wrap gap-2 items-center justify-between">
+            <div id="role-action-info" class="text-xs font-bold text-slate-700"></div>
+            <div class="flex flex-wrap gap-2">
+                <button id="role-print-btn" onclick="printFullSheet()" class="bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs px-3 py-2 rounded-lg">
+                    <i class="fas fa-print mr-1"></i> Cetak Laporan
+                </button>
+                <button id="role-report-pdf-btn" onclick="exportWeeklyIuranToPDF()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-3 py-2 rounded-lg">
+                    <i class="fas fa-file-pdf mr-1"></i> Rekap PDF
+                </button>
+                <button id="role-report-csv-btn" onclick="exportWeeklyIuranToExcel()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs px-3 py-2 rounded-lg">
+                    <i class="fas fa-file-csv mr-1"></i> Rekap CSV
+                </button>
+                <button id="role-student-btn" onclick="openStudentManager()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3 py-2 rounded-lg">
+                    <i class="fas fa-users-gear mr-1"></i> Kelola Siswa
+                </button>
+            </div>
+        </div>
+
+        <div id="action-buttons" class="flex flex-wrap gap-2 justify-end">
+            <button id="btn-print-full" onclick="printFullSheet()" class="hidden bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs px-3 py-2 rounded-lg transition-all shadow-sm flex items-center gap-1.5">
+                <i class="fas fa-print text-amber-300"></i> Cetak Halaman Utuh
+            </button>
+            <button id="btn-export-excel" onclick="exportToExcel()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3 py-2 rounded-lg transition-all shadow-sm flex items-center gap-1.5">
+                <i class="fas fa-file-excel"></i> Download Jurnal Kas (.csv)
+            </button>
+            <button id="btn-export-iuran-excel" onclick="exportWeeklyIuranToExcel()" class="hidden bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs px-3 py-2 rounded-lg transition-all shadow-sm flex items-center gap-1.5">
+                <i class="fas fa-table-list text-amber-300"></i> Download Rekap (.csv)
+            </button>
+            <button id="btn-export-iuran-pdf" onclick="exportWeeklyIuranToPDF()" class="hidden bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-3 py-2 rounded-lg transition-all shadow-sm flex items-center gap-1.5">
+                <i class="fas fa-file-pdf text-amber-300"></i> Download Rekap (.pdf)
+            </button>
+            <button id="btn-student-manager-main" onclick="openStudentManager()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3 py-2 rounded-lg transition-all shadow-sm flex items-center gap-1.5">
+                <i class="fas fa-users-gear"></i> Kelola Siswa
+            </button>
+        </div>
+
+        <!-- Form Input Transaksi Kas -->
+        <div id="admin-form-container" class="hidden bg-amber-50/70 border-2 border-amber-300 p-5 rounded-xl shadow-sm">
+            <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
+                <h2 class="text-base font-bold text-amber-900 flex items-center gap-2">
+                    <i class="fas fa-pen-to-square text-amber-600"></i> Form Input Kas (<span id="active-user-label">Pengurus</span>)
+                </h2>
+                <div class="flex flex-wrap gap-2">
+                    <button id="btn-manage-treasurer" onclick="openManageTreasurerModal()" class="hidden text-xs font-bold bg-teal-600 hover:bg-teal-700 text-white px-2.5 py-1 rounded-lg transition-all shadow-sm">
+                        <i class="fas fa-user-gear mr-1"></i> Kelola Bendahara
+                    </button>
+                    <button id="btn-change-pin" onclick="openChangePinModal()" class="hidden text-xs font-semibold bg-amber-200 hover:bg-amber-300 text-amber-900 px-2.5 py-1 rounded-lg transition-all border border-amber-400">
+                        <i class="fas fa-key mr-1"></i> Ganti PIN
+                    </button>
+                    <button onclick="resetData()" class="text-xs font-semibold bg-rose-100 hover:bg-rose-200 text-rose-700 px-2.5 py-1 rounded-lg transition-all">
+                        <i class="fas fa-rotate-left mr-1"></i> Kosongkan Seluruh Data
+                    </button>
+                </div>
+            </div>
+            <form id="trans-form" onsubmit="handleFormSubmit(event)" class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal</label>
+                    <input type="date" id="t-date" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-teal-500 outline-none bg-white">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Siswa / Subjek</label>
+                    <select id="t-student-select" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-teal-500 outline-none bg-white font-medium">
+                        <!-- Render Otomatis -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Keterangan / Uraian</label>
+                    <input type="text" id="t-desc" placeholder="Contoh: Iuran Mingguan 1 / Beli Spidol" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-teal-500 outline-none bg-white">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Jenis & Nominal (Rp)</label>
+                    <div class="flex gap-1">
+                        <select id="t-type" class="w-1/2 border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-teal-500 outline-none bg-white">
+                            <option value="Pemasukan">Pemasukan (+)</option>
+                            <option value="Pengeluaran">Pengeluaran (-)</option>
+                        </select>
+                        <input type="number" id="t-amount" min="500" placeholder="5000" required class="w-1/2 border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-teal-500 outline-none bg-white">
+                    </div>
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition-all shadow-sm">
+                        + Simpan Transaksi
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- SEKSI 1: TABEL LAPORAN REKAP IURAN MINGGUAN PER SISWA WITH MONTH SELECTOR -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-4 border-b border-slate-200 flex flex-wrap justify-between items-center gap-3 bg-slate-100">
+                <div>
+                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fas fa-calendar-check text-teal-600"></i> Rekap Iuran Siswa Periode: <span id="rekap-month-title" class="text-teal-700">-</span>
+                    </h2>
+                    <p class="text-xs text-slate-500">Matriks pembayaran iuran 35 siswa (Minggu 1 s.d. Minggu 4)</p>
+                </div>
+                <div id="month-selector-container" class="flex flex-wrap items-center gap-2">
+                    <label class="text-xs font-semibold text-slate-600 flex items-center gap-1">
+                        <i class="fas fa-filter text-teal-600"></i> Pilih Bulan:
+                    </label>
+                    <select id="month-filter" onchange="renderRekapTable()" class="border border-slate-300 font-medium text-slate-700 rounded-lg px-2.5 py-1.5 text-xs outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                        <!-- Options generated dynamically -->
+                    </select>
+                    <input type="text" id="search-rekap" oninput="renderRekapTable()" placeholder="Cari nama / NIS..." class="border border-slate-300 rounded-lg px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-teal-500 w-full sm:w-48">
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-teal-800 text-white text-xs uppercase font-semibold">
+                        <tr>
+                            <th class="p-3 text-center w-12">No</th>
+                            <th class="p-3 text-center w-20">NIS</th>
+                            <th class="p-3">Nama Siswa</th>
+                            <th class="p-3 text-right">Minggu 1</th>
+                            <th class="p-3 text-right">Minggu 2</th>
+                            <th class="p-3 text-right">Minggu 3</th>
+                            <th class="p-3 text-right">Minggu 4</th>
+                            <th class="p-3 text-right font-bold bg-teal-900">Total Bayar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rekap-tbody" class="divide-y divide-slate-200">
+                        <!-- Render Otomatis Matriks Iuran Siswa -->
+                    </tbody>
+                    <tfoot class="bg-slate-100 font-bold text-slate-800 text-sm border-t-2 border-slate-300">
+                        <tr>
+                            <td colspan="3" class="p-3 text-right">TOTAL KESELURUHAN:</td>
+                            <td id="rekap-tot-m1" class="p-3 text-right text-teal-700">Rp 0</td>
+                            <td id="rekap-tot-m2" class="p-3 text-right text-teal-700">Rp 0</td>
+                            <td id="rekap-tot-m3" class="p-3 text-right text-teal-700">Rp 0</td>
+                            <td id="rekap-tot-m4" class="p-3 text-right text-teal-700">Rp 0</td>
+                            <td id="rekap-tot-grand" class="p-3 text-right text-emerald-700 bg-emerald-50">Rp 0</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <!-- SEKSI 2: TABEL JURNAL TRANSAKSI KAS -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-4 border-b border-slate-200 flex flex-wrap justify-between items-center gap-2 bg-slate-50">
+                <h2 class="text-base font-bold text-slate-700 flex items-center gap-2">
+                    <i class="fas fa-list-check text-teal-600"></i> Jurnal Transaksi Kas Kelas (Semua Riwayat)
+                </h2>
+                <input type="text" id="search-kas" oninput="renderKasJournal()" placeholder="Cari di jurnal kas..." class="border border-slate-300 rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-teal-500 w-full sm:w-64">
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-teal-700 text-white text-xs uppercase font-semibold">
+                        <tr>
+                            <th class="p-3 text-center">No</th>
+                            <th class="p-3 text-center">Tanggal</th>
+                            <th class="p-3 text-center">NIS</th>
+                            <th class="p-3">Nama Siswa / Subjek</th>
+                            <th class="p-3">Keterangan / Uraian</th>
+                            <th class="p-3 text-right">Pemasukan (Rp)</th>
+                            <th class="p-3 text-right">Pengeluaran (Rp)</th>
+                            <th class="p-3 text-right">Saldo Akhir (Rp)</th>
+                            <th class="p-3 text-center admin-col hidden">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="kas-tbody" class="divide-y divide-slate-200">
+                        <!-- Data transaksi kas -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Kelola Nama Siswa & Arsip -->
+    <div id="student-manager-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 p-5 max-w-3xl w-full max-h-[92vh] overflow-y-auto space-y-4">
+            <div class="flex flex-wrap justify-between items-start gap-3">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800"><i class="fas fa-users-gear text-indigo-600 mr-2"></i>Kelola Nama Siswa</h3>
+                    <p class="text-xs text-slate-500 mt-1">Tambah manual, upload Excel/CSV, dan arsipkan daftar siswa untuk dipakai kembali kapan saja.</p>
+                </div>
+                <button onclick="closeStudentManager()" class="text-slate-400 hover:text-slate-700 text-lg"><i class="fas fa-xmark"></i></button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="border border-emerald-200 bg-emerald-50 rounded-xl p-4">
+                    <h4 class="font-bold text-sm text-emerald-900 mb-2"><i class="fas fa-user-plus mr-1"></i>Tambah Siswa Manual</h4>
+                    <p class="text-xs text-emerald-800 mb-3">Tambahkan satu siswa tanpa perlu membuat file Excel.</p>
+                    <div class="grid grid-cols-1 gap-2">
+                        <input id="manual-student-nis" type="text" inputmode="numeric" placeholder="NIS" class="w-full border border-emerald-300 rounded-lg p-2 text-xs bg-white">
+                        <input id="manual-student-name" type="text" placeholder="Nama lengkap siswa" class="w-full border border-emerald-300 rounded-lg p-2 text-xs bg-white">
+                        <button id="manual-student-btn" onclick="addStudentManual()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 rounded-lg">
+                            <i class="fas fa-plus mr-1"></i>Tambah Siswa
+                        </button>
+                    </div>
+                    <p id="manual-student-msg" class="text-xs mt-2 hidden"></p>
+                </div>
+
+                <div class="border border-indigo-200 bg-indigo-50 rounded-xl p-4">
+                    <h4 class="font-bold text-sm text-indigo-900 mb-2"><i class="fas fa-file-arrow-up mr-1"></i>Upload Nama Siswa</h4>
+                    <p class="text-xs text-indigo-800 mb-3">Pilih langsung file <b>MS Excel (.xlsx/.xls)</b> atau <b>CSV</b>. Kolom yang dibaca: <b>NIS</b> dan <b>Nama Siswa</b>.</p>
+                    <input id="student-file-input" type="file" accept=".xlsx,.xls,.csv,.txt" class="w-full text-xs border border-indigo-200 rounded-lg p-2 bg-white">
+                    <div class="flex gap-2 mt-3">
+                        <button onclick="uploadStudentFile()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2 rounded-lg"><i class="fas fa-upload mr-1"></i>Upload</button>
+                        <button id="student-template-btn" onclick="downloadStudentTemplate()" class="flex-1 bg-white text-indigo-700 font-bold text-xs py-2 rounded-lg border border-indigo-200 hidden"><i class="fas fa-download mr-1"></i>Template</button>
+                    </div>
+                    <p id="student-upload-msg" class="text-xs mt-2 hidden"></p>
+                </div>
+
+                <div class="border border-amber-200 bg-amber-50 rounded-xl p-4">
+                    <h4 class="font-bold text-sm text-amber-900 mb-2"><i class="fas fa-box-archive mr-1"></i>Arsip Daftar Siswa</h4>
+                    <div class="flex gap-2 mb-3">
+                        <input id="archive-name-input" type="text" placeholder="Nama arsip, mis. VIII E 2026/2027" class="flex-1 border border-amber-300 rounded-lg p-2 text-xs bg-white">
+                        <button onclick="archiveCurrentStudents()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold text-xs px-3 py-2 rounded-lg">Arsipkan</button>
+                    </div>
+                    <select id="student-archive-select" class="w-full border border-amber-300 rounded-lg p-2 text-xs bg-white" onchange="showSelectedArchive()">
+                        <option value="">-- Pilih Arsip --</option>
+                    </select>
+                    <div class="flex gap-2 mt-2">
+                        <button onclick="restoreSelectedArchive()" class="flex-1 bg-amber-100 text-amber-900 font-bold text-xs py-2 rounded-lg border border-amber-300"><i class="fas fa-rotate-left mr-1"></i>Pulihkan</button>
+                        <button onclick="deleteSelectedArchive()" class="flex-1 bg-rose-100 text-rose-700 font-bold text-xs py-2 rounded-lg border border-rose-200"><i class="fas fa-trash mr-1"></i>Hapus</button>
+                    </div>
+                    <div id="archive-preview" class="text-xs text-slate-500 mt-2"></div>
+                </div>
+            </div>
+
+            <div class="border border-slate-200 rounded-xl overflow-hidden">
+                <div class="bg-slate-100 px-4 py-3 flex justify-between items-center">
+                    <div>
+                        <h4 class="font-bold text-sm text-slate-800">Daftar Siswa Aktif</h4>
+                        <p id="student-count-label" class="text-xs text-slate-500"></p>
+                    </div>
+                    <button id="student-download-btn" onclick="downloadCurrentStudents()" class="bg-white text-slate-700 font-bold text-xs px-3 py-1.5 rounded-lg border border-slate-300 hidden"><i class="fas fa-file-csv mr-1"></i>Download</button>
+                </div>
+                <div class="max-h-64 overflow-y-auto">
+                    <table class="w-full text-xs">
+                        <thead class="bg-slate-700 text-white sticky top-0">
+                            <tr><th class="p-2 text-center">No</th><th class="p-2 text-center">NIS</th><th class="p-2 text-left">Nama Siswa</th><th class="p-2 text-center">Aksi</th></tr>
+                        </thead>
+                        <tbody id="student-manager-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="flex justify-end">
+                <button onclick="closeStudentManager()" class="bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2 rounded-lg">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Login Pengurus -->
+    <div id="login-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 max-w-sm w-full space-y-4">
+            <div class="text-center">
+                <div class="bg-amber-100 text-amber-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2 text-xl">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800">Verifikasi Pengurus</h3>
+                <p class="text-xs text-slate-500 mt-1">Masukkan NIP Wali Kelas / NIS Bendahara & PIN Rahasia.</p>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">NIP / NIS Pengurus</label>
+                    <input type="text" id="id-input" placeholder="Masukkan NIP Wali / NIS Bendahara" class="w-full border border-slate-300 rounded-lg p-2.5 text-center text-sm font-semibold focus:ring-2 focus:ring-amber-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">PIN Rahasia</label>
+                    <input type="password" id="pin-input" placeholder="Masukkan PIN" class="w-full border border-slate-300 rounded-lg p-2.5 text-center text-lg tracking-widest font-mono focus:ring-2 focus:ring-amber-500 outline-none">
+                </div>
+                <p id="login-error" class="text-xs text-rose-600 hidden text-center font-bold">⚠️ NIP/NIS atau PIN tidak valid!</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="closeModal()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 rounded-lg text-sm">Batal</button>
+                <button onclick="verifyPin()" class="w-1/2 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-2 rounded-lg text-sm">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Kelola Bendahara -->
+    <div id="manage-treasurer-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 max-w-md w-full space-y-4">
+            <div class="text-center">
+                <div class="bg-teal-100 text-teal-700 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2 text-xl">
+                    <i class="fas fa-users-gear"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800">Atur Bendahara Kelas</h3>
+                <p class="text-xs text-slate-500 mt-1">Pilih siswa dari daftar di bawah ini yang diberikan hak sebagai Bendahara Kas.</p>
+            </div>
+            <div class="space-y-2 max-h-60 overflow-y-auto p-2 border border-slate-200 rounded-lg bg-slate-50" id="treasurer-checkbox-list">
+                <!-- Checkbox siswa di-render JS -->
+            </div>
+            <p id="treasurer-save-msg" class="text-xs hidden text-center font-bold text-emerald-600">✅ Daftar Bendahara Berhasil Disimpan!</p>
+            <div class="flex gap-2">
+                <button onclick="closeManageTreasurerModal()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 rounded-lg text-sm">Tutup</button>
+                <button onclick="saveTreasurers()" class="w-1/2 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-lg text-sm">Simpan Perubahan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ganti PIN -->
+    <div id="change-pin-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 max-w-sm w-full space-y-4">
+            <div class="text-center">
+                <div class="bg-amber-100 text-amber-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2 text-xl">
+                    <i class="fas fa-key"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800">Ganti PIN Utama</h3>
+                <p class="text-xs text-slate-500 mt-1">Masukkan PIN lama Anda, lalu buat PIN baru.</p>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">PIN Lama</label>
+                    <input type="password" id="old-pin-input" placeholder="PIN Lama" class="w-full border border-slate-300 rounded-lg p-2 text-center text-base tracking-widest font-mono focus:ring-2 focus:ring-amber-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">PIN Baru</label>
+                    <input type="password" id="new-pin-input" placeholder="PIN Baru" class="w-full border border-slate-300 rounded-lg p-2 text-center text-base tracking-widest font-mono focus:ring-2 focus:ring-amber-500 outline-none">
+                </div>
+                <p id="change-pin-msg" class="text-xs hidden text-center font-bold"></p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="closeChangePinModal()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 rounded-lg text-sm">Batal</button>
+                <button onclick="saveNewPin()" class="w-1/2 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-2 rounded-lg text-sm">Simpan PIN Baru</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logika Aplikasi (JavaScript) -->
+    <script>
+        const monthNamesIndo = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+        // MASTER DATA 35 SISWA
+        const masterStudents = [
+            { nis: "-", name: "-- Non-Siswa / Pengeluaran Kelas --" },
+            { nis: "6251", name: "Ahmad Ghifari Risti" },
+            { nis: "6252", name: "Al Meliqi Ibrahim" },
+            { nis: "6253", name: "Aldrien Joel Levine Simorangkir" },
+            { nis: "6254", name: "Alif Amza Putra" },
+            { nis: "6255", name: "Alvis Triangali" },
+            { nis: "6256", name: "Andika Prasetya Dewa" },
+            { nis: "6257", name: "Aniya Aditya" },
+            { nis: "6258", name: "Arfa Adi Nata" },
+            { nis: "6259", name: "Arzki Pratama Herdiyanto" },
+            { nis: "6260", name: "Auria Rahmah" },
+            { nis: "6261", name: "Azfar Azizan" },
+            { nis: "6262", name: "Barata Ali Mustofa Gino" },
+            { nis: "6263", name: "Bunga Mutiara Faradilla" },
+            { nis: "6264", name: "Cindy Nur Camelia" },
+            { nis: "6265", name: "Dzaky Altaf" },
+            { nis: "6266", name: "Eka Putri Rahayu Septianingsih" },
+            { nis: "6267", name: "Fajra" },
+            { nis: "6268", name: "Fauziyyah Neldina" },
+            { nis: "6269", name: "Gusti Ayu Putri Beiby Angel Wienate" },
+            { nis: "6270", name: "Ilham" },
+            { nis: "6271", name: "Keyla Tri Andjani" },
+            { nis: "6272", name: "Kharin Elmeyra Putri" },
+            { nis: "6273", name: "Kirana Marella Syaiful" },
+            { nis: "6274", name: "Meysya Sari Pramudya" },
+            { nis: "6275", name: "Muhammad Azuan Helmi Labib" },
+            { nis: "6276", name: "Muhammad Fahmi" },
+            { nis: "6277", name: "Muhammad Nur Rihansyah" },
+            { nis: "6278", name: "Nabila Choirunisa" },
+            { nis: "6279", name: "Novita Sally Polii" },
+            { nis: "6280", name: "Nur Wulan Rizkia" },
+            { nis: "6281", name: "Riska Septiani" },
+            { nis: "6282", name: "Rizka Lailiz Ramadhani" },
+            { nis: "6283", name: "Salsabila Humairah" },
+            { nis: "6284", name: "Senjaya Muhammad Syah Naqsyabandi" },
+            { nis: "6285", name: "Vivi Aldya Sulamto" }
+        ];
+
+        // NIP Wali Kelas
+        const WALI_NIP = "198812222022211003";
+
+        // Daftar NIS Bendahara
+        let activeTreasurers = JSON.parse(localStorage.getItem('kas_viiie_treasurers')) || ["6251", "6252"];
+
+        // DATA DEFAULT TRANSAKSI DIKOSONGKAN SEPENUHNYA
+        const defaultTransactions = [];
+
+        let storedData = localStorage.getItem('kas_viiie_data');
+        let transactions = storedData ? JSON.parse(storedData) : defaultTransactions;
+
+        let currentPin = localStorage.getItem('kas_viiie_pin') || "1234";
+        let isAdmin = false;
+        let isWaliKelas = false;
+        let activeUserRole = "";
+
+        // Fungsi Membaca Bulan & Tahun dari String Tanggal ("DD/MM/YYYY")
+        function getMonthYearFromDateStr(dateStr) {
+            if (!dateStr || !dateStr.includes('/')) return null;
+            const parts = dateStr.split('/');
+            if (parts.length === 3) {
+                const m = parseInt(parts[1], 10) - 1;
+                const y = parseInt(parts[2], 10);
+                if (!isNaN(m) && !isNaN(y)) {
+                    return { monthIndex: m, year: y, key: `${y}-${String(m + 1).padStart(2, '0')}`, label: `${monthNamesIndo[m]} ${y}` };
+                }
+            }
+            return null;
+        }
+
+        // Generate Dropdown Bulan Sesuai Transaksi
+        function updateMonthSelectorOptions() {
+            const selectEl = document.getElementById('month-filter');
+            const currentSelected = selectEl.value;
+            selectEl.innerHTML = "";
+
+            const monthsMap = new Map();
+
+            // Default tambahkan bulan berjalan
+            const now = new Date();
+            const currentKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            monthsMap.set(currentKey, `${monthNamesIndo[now.getMonth()]} ${now.getFullYear()}`);
+
+            transactions.forEach(t => {
+                const my = getMonthYearFromDateStr(t.date);
+                if (my) {
+                    monthsMap.set(my.key, my.label);
+                }
+            });
+
+            // Urutkan key dari yang terbaru
+            const sortedKeys = Array.from(monthsMap.keys()).sort().reverse();
+
+            sortedKeys.forEach(key => {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.innerText = monthsMap.get(key);
+                if (key === currentSelected) opt.selected = true;
+                selectEl.appendChild(opt);
+            });
+
+            if (!selectEl.value && sortedKeys.length > 0) {
+                selectEl.value = sortedKeys[0];
+            }
+        }
+
+        function initStudentDropdown() {
+            const selectEl = document.getElementById('t-student-select');
+            selectEl.innerHTML = "";
+            masterStudents.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.name;
+                opt.dataset.nis = s.nis;
+                opt.innerText = s.nis !== "-" ? `${s.name} (${s.nis})` : s.name;
+                selectEl.appendChild(opt);
+            });
+        }
+
+        function saveDataPermanently() {
+            localStorage.setItem('kas_viiie_data', JSON.stringify(transactions));
+            updateMonthSelectorOptions();
+            if (typeof simpanDataKeFirebase === 'function') {
+                simpanDataKeFirebase();
+            }
+        }
+
+        function formatRp(val) {
+            return "Rp " + val.toLocaleString('id-ID');
+        }
+
+        function toggleAuth() {
+            if (isAdmin) {
+                isAdmin = false;
+                isWaliKelas = false;
+                activeUserRole = "";
+                updateRoleUI();
+            } else {
+                document.getElementById('login-modal').classList.remove('hidden');
+                document.getElementById('id-input').value = "";
+                document.getElementById('pin-input').value = "";
+                document.getElementById('login-error').classList.add('hidden');
+                document.getElementById('id-input').focus();
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('login-modal').classList.add('hidden');
+            document.getElementById('login-error').classList.add('hidden');
+        }
+
+        function verifyPin() {
+            const inputID = document.getElementById('id-input').value.trim();
+            const inputPin = document.getElementById('pin-input').value.trim();
+            const loginError = document.getElementById('login-error');
+
+            const isWali = (inputID === WALI_NIP);
+            const isTreasurer = activeTreasurers.includes(inputID);
+            const isPinValid = (inputPin === currentPin);
+
+            if ((isWali || isTreasurer) && isPinValid) {
+                isAdmin = true;
+                if (isWali) {
+                    isWaliKelas = true;
+                    activeUserRole = "Wali Kelas (Eko Dainur Utomo Pasi, S.Pd., Gr.)";
+                } else {
+                    isWaliKelas = false;
+                    const student = masterStudents.find(s => s.nis === inputID);
+                    activeUserRole = student ? `Bendahara (${student.name})` : "Bendahara Kelas";
+                }
+
+                loginError.classList.add('hidden');
+                closeModal();
+                updateRoleUI();
+            } else {
+                loginError.classList.remove('hidden');
+            }
+        }
+
+        document.getElementById('pin-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') verifyPin();
+        });
+
+        function openManageTreasurerModal() {
+            if (!isWaliKelas) return;
+            const container = document.getElementById('treasurer-checkbox-list');
+            container.innerHTML = "";
+
+            masterStudents.filter(s => s.nis !== "-").forEach(s => {
+                const isChecked = activeTreasurers.includes(s.nis) ? "checked" : "";
+                const div = document.createElement('div');
+                div.className = "flex items-center gap-2 p-1.5 hover:bg-white rounded transition-colors text-xs";
+                div.innerHTML = `
+                    <input type="checkbox" id="chk-${s.nis}" value="${s.nis}" ${isChecked} class="w-4 h-4 text-teal-600 rounded focus:ring-teal-500">
+                    <label for="chk-${s.nis}" class="cursor-pointer font-medium text-slate-700">${s.name} <span class="text-slate-400">(${s.nis})</span></label>
+                `;
+                container.appendChild(div);
+            });
+
+            document.getElementById('treasurer-save-msg').classList.add('hidden');
+            document.getElementById('manage-treasurer-modal').classList.remove('hidden');
+        }
+
+        function closeManageTreasurerModal() {
+            document.getElementById('manage-treasurer-modal').classList.add('hidden');
+        }
+
+        function saveTreasurers() {
+            const checkedInputs = document.querySelectorAll('#treasurer-checkbox-list input[type="checkbox"]:checked');
+            activeTreasurers = Array.from(checkedInputs).map(cb => cb.value);
+            localStorage.setItem('kas_viiie_treasurers', JSON.stringify(activeTreasurers));
+            if (typeof simpanBendaharaKeFirebase === 'function') {
+                simpanBendaharaKeFirebase();
+            }
+
+            const msg = document.getElementById('treasurer-save-msg');
+            msg.classList.remove('hidden');
+            setTimeout(() => {
+                closeManageTreasurerModal();
+            }, 1000);
+        }
+
+        function openChangePinModal() {
+            document.getElementById('old-pin-input').value = "";
+            document.getElementById('new-pin-input').value = "";
+            document.getElementById('change-pin-msg').classList.add('hidden');
+            document.getElementById('change-pin-modal').classList.remove('hidden');
+        }
+
+        function closeChangePinModal() {
+            document.getElementById('change-pin-modal').classList.add('hidden');
+        }
+
+        function saveNewPin() {
+            const oldPin = document.getElementById('old-pin-input').value.trim();
+            const newPin = document.getElementById('new-pin-input').value.trim();
+            const msg = document.getElementById('change-pin-msg');
+
+            if (oldPin !== currentPin) {
+                msg.innerText = "❌ PIN Lama Salah!";
+                msg.className = "text-xs text-rose-600 text-center font-bold";
+                msg.classList.remove('hidden');
+                return;
+            }
+
+            if (newPin.length < 4) {
+                msg.innerText = "⚠️ PIN Minimal 4 Karakter!";
+                msg.className = "text-xs text-amber-600 text-center font-bold";
+                msg.classList.remove('hidden');
+                return;
+            }
+
+            currentPin = newPin;
+            localStorage.setItem('kas_viiie_pin', currentPin);
+            if (typeof simpanPinKeFirebase === 'function') {
+                simpanPinKeFirebase();
+            }
+
+            msg.innerText = "✅ PIN Berhasil Diperbarui!";
+            msg.className = "text-xs text-emerald-600 text-center font-bold";
+            msg.classList.remove('hidden');
+
+            setTimeout(() => {
+                closeChangePinModal();
+            }, 1200);
+        }
+
+        function updateRoleUI() {
+            const roleBadge = document.getElementById('role-badge');
+            const authBtnText = document.getElementById('auth-btn-text');
+            const authIcon = document.getElementById('auth-icon');
+            const adminForm = document.getElementById('admin-form-container');
+            const adminCols = document.querySelectorAll('.admin-col');
+            const activeUserLabel = document.getElementById('active-user-label');
+            const btnManageTreasurer = document.getElementById('btn-manage-treasurer');
+            const btnChangePin = document.getElementById('btn-change-pin');
+
+            if (isAdmin) {
+                roleBadge.className = isWaliKelas 
+                    ? "bg-purple-800 text-purple-100 text-xs px-3 py-1.5 rounded-full border border-purple-500 font-medium" 
+                    : "bg-amber-500 text-slate-900 text-xs px-3 py-1.5 rounded-full font-bold";
+                roleBadge.innerHTML = `<i class="fas fa-user-check mr-1"></i> ${activeUserRole}`;
+
+                authBtnText.innerText = "Logout";
+                authIcon.className = "fas fa-right-from-bracket";
+
+                adminForm.classList.remove('hidden');
+                activeUserLabel.innerText = activeUserRole;
+
+                if (isWaliKelas) {
+                    btnManageTreasurer.classList.remove('hidden');
+                } else {
+                    btnManageTreasurer.classList.add('hidden');
+                }
+                btnChangePin.classList.remove('hidden');
+
+                adminCols.forEach(col => col.classList.remove('hidden'));
+            } else {
+                roleBadge.className = "bg-teal-800 text-teal-100 text-xs px-3 py-1.5 rounded-full border border-teal-600 font-medium";
+                roleBadge.innerHTML = `<i class="fas fa-eye mr-1"></i> Mode Siswa (Hanya Lihat)`;
+
+                authBtnText.innerText = "Login Pengurus";
+                authIcon.className = "fas fa-lock";
+
+                adminForm.classList.add('hidden');
+                btnManageTreasurer.classList.add('hidden');
+                btnChangePin.classList.add('hidden');
+
+                adminCols.forEach(col => col.classList.add('hidden'));
+            }
+
+            renderKasJournal();
+            updateDocumentDownloadAccess();
+        }
+
+        function calculateKPI() {
+            let totalIn = 0;
+            let totalOut = 0;
+
+            transactions.forEach(t => {
+                totalIn += (t.in || 0);
+                totalOut += (t.out || 0);
+            });
+
+            document.getElementById('kpi-pemasukan').innerText = formatRp(totalIn);
+            document.getElementById('kpi-pengeluaran').innerText = formatRp(totalOut);
+            document.getElementById('kpi-saldo').innerText = formatRp(totalIn - totalOut);
+            document.getElementById('kpi-trans-count').innerText = `${transactions.length} Data`;
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const rawDate = document.getElementById('t-date').value;
+            if (!rawDate) return;
+
+            const dateParts = rawDate.split('-'); // YYYY-MM-DD
+            const formattedDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+
+            const studentSelect = document.getElementById('t-student-select');
+            const selectedOpt = studentSelect.options[studentSelect.selectedIndex];
+            const name = selectedOpt.value;
+            const nis = selectedOpt.dataset.nis || "-";
+
+            const desc = document.getElementById('t-desc').value.trim();
+            const type = document.getElementById('t-type').value;
+            const amount = parseInt(document.getElementById('t-amount').value, 10) || 0;
+
+            const newTrans = {
+                id: Date.now(),
+                date: formattedDate,
+                nis: nis,
+                name: name,
+                desc: desc,
+                in: type === "Pemasukan" ? amount : 0,
+                out: type === "Pengeluaran" ? amount : 0
+            };
+
+            transactions.push(newTrans);
+            saveDataPermanently();
+
+            // Reset form
+            document.getElementById('t-desc').value = "";
+            document.getElementById('t-amount').value = "";
+
+            renderKasJournal();
+            renderRekapTable();
+            calculateKPI();
+        }
+
+        function deleteTransaction(id) {
+            if (!confirm("Apakah Anda yakin ingin menghapus transaksi ini?")) return;
+            transactions = transactions.filter(t => t.id !== id);
+            saveDataPermanently();
+
+            renderKasJournal();
+            renderRekapTable();
+            calculateKPI();
+        }
+
+        function renderKasJournal() {
+            const tbody = document.getElementById('kas-tbody');
+            const searchTerm = document.getElementById('search-kas').value.toLowerCase();
+            tbody.innerHTML = "";
+
+            let runningBalance = 0;
+            let count = 0;
+
+            transactions.forEach((t) => {
+                runningBalance += (t.in - t.out);
+
+                const isMatch = t.name.toLowerCase().includes(searchTerm) || 
+                                t.desc.toLowerCase().includes(searchTerm) || 
+                                t.nis.toLowerCase().includes(searchTerm) || 
+                                t.date.includes(searchTerm);
+
+                if (isMatch) {
+                    count++;
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 border-b border-slate-100 transition-colors";
+                    tr.innerHTML = `
+                        <td class="p-3 text-center text-slate-400 font-medium">${count}</td>
+                        <td class="p-3 text-center font-mono text-xs whitespace-nowrap">${t.date}</td>
+                        <td class="p-3 text-center font-mono text-xs text-slate-500">${t.nis}</td>
+                        <td class="p-3 font-semibold text-slate-800">${t.name}</td>
+                        <td class="p-3 text-slate-600">${t.desc}</td>
+                        <td class="p-3 text-right font-medium text-teal-600">${t.in > 0 ? formatRp(t.in) : "-"}</td>
+                        <td class="p-3 text-right font-medium text-rose-600">${t.out > 0 ? formatRp(t.out) : "-"}</td>
+                        <td class="p-3 text-right font-bold text-slate-800">${formatRp(runningBalance)}</td>
+                        <td class="p-3 text-center admin-col ${isAdmin ? '' : 'hidden'}">
+                            <button onclick="deleteTransaction(${t.id})" class="text-rose-500 hover:text-rose-700 text-xs px-2 py-1 rounded bg-rose-50 hover:bg-rose-100 transition-all">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            });
+
+            if (count === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">Belum ada transaksi. Tambahkan transaksi pertama melalui form pengurus.</td></tr>`;
+            }
+
+            calculateKPI();
+        }
+
+        function renderRekapTable() {
+            const selectedMonthKey = document.getElementById('month-filter').value;
+            const selectEl = document.getElementById('month-filter');
+            const selectedMonthLabel = selectEl.options[selectEl.selectedIndex] ? selectEl.options[selectEl.selectedIndex].text : "-";
+            
+            document.getElementById('rekap-month-title').innerText = selectedMonthLabel;
+            document.getElementById('print-month-label').innerText = selectedMonthLabel;
+
+            const searchTerm = document.getElementById('search-rekap').value.toLowerCase();
+            const tbody = document.getElementById('rekap-tbody');
+            tbody.innerHTML = "";
+
+            let totM1 = 0, totM2 = 0, totM3 = 0, totM4 = 0, totGrand = 0;
+            let count = 0;
+
+            const studentsOnly = masterStudents.filter(s => s.nis !== "-");
+
+            studentsOnly.forEach(s => {
+                const isMatch = s.name.toLowerCase().includes(searchTerm) || s.nis.toLowerCase().includes(searchTerm);
+                if (!isMatch) return;
+
+                count++;
+
+                let m1 = 0, m2 = 0, m3 = 0, m4 = 0;
+
+                transactions.forEach(t => {
+                    if (t.nis === s.nis && t.in > 0) {
+                        const my = getMonthYearFromDateStr(t.date);
+                        if (my && my.key === selectedMonthKey) {
+                            const day = parseInt(t.date.split('/')[0], 10);
+                            if (day >= 1 && day <= 7) m1 += t.in;
+                            else if (day >= 8 && day <= 14) m2 += t.in;
+                            else if (day >= 15 && day <= 21) m3 += t.in;
+                            else if (day >= 22) m4 += t.in;
+                        }
+                    }
+                });
+
+                const totalStudent = m1 + m2 + m3 + m4;
+
+                totM1 += m1;
+                totM2 += m2;
+                totM3 += m3;
+                totM4 += m4;
+                totGrand += totalStudent;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 border-b border-slate-100 transition-colors";
+                tr.innerHTML = `
+                    <td class="p-3 text-center text-slate-400 font-medium">${count}</td>
+                    <td class="p-3 text-center font-mono text-xs text-slate-500">${s.nis}</td>
+                    <td class="p-3 font-semibold text-slate-800">${s.name}</td>
+                    <td class="p-3 text-right font-medium ${m1 > 0 ? 'text-teal-700' : 'text-slate-300'}">${m1 > 0 ? formatRp(m1) : '-'}</td>
+                    <td class="p-3 text-right font-medium ${m2 > 0 ? 'text-teal-700' : 'text-slate-300'}">${m2 > 0 ? formatRp(m2) : '-'}</td>
+                    <td class="p-3 text-right font-medium ${m3 > 0 ? 'text-teal-700' : 'text-slate-300'}">${m3 > 0 ? formatRp(m3) : '-'}</td>
+                    <td class="p-3 text-right font-medium ${m4 > 0 ? 'text-teal-700' : 'text-slate-300'}">${m4 > 0 ? formatRp(m4) : '-'}</td>
+                    <td class="p-3 text-right font-bold text-emerald-700 bg-slate-50">${totalStudent > 0 ? formatRp(totalStudent) : '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('rekap-tot-m1').innerText = formatRp(totM1);
+            document.getElementById('rekap-tot-m2').innerText = formatRp(totM2);
+            document.getElementById('rekap-tot-m3').innerText = formatRp(totM3);
+            document.getElementById('rekap-tot-m4').innerText = formatRp(totM4);
+            document.getElementById('rekap-tot-grand').innerText = formatRp(totGrand);
+        }
+
+        function resetData() {
+            if (confirm("Apakah Anda yakin ingin mengosongkan seluruh data transaksi yang tersimpan?")) {
+                localStorage.setItem('kas_viiie_data', JSON.stringify([]));
+                transactions = [];
+                updateMonthSelectorOptions();
+                if (typeof simpanDataKeFirebase === 'function') {
+                    simpanDataKeFirebase();
+                }
+                renderKasJournal();
+                renderRekapTable();
+                calculateKPI();
+            }
+        }
+
+        function printFullSheet() {
+            if (!(isAdmin || isWaliKelas)) { alert("Cetak/download dokumen hanya untuk Admin/Bendahara."); return; }
+            const today = new Date();
+            const dateStr = `${today.getDate()} ${monthNamesIndo[today.getMonth()]} ${today.getFullYear()}`;
+            document.getElementById('print-date').innerText = dateStr;
+            window.print();
+        }
+
+        function exportToExcel() {
+            if (!(isAdmin && !isWaliKelas)) { alert("Download dokumen hanya untuk Bendahara/Admin yang diberi hak download."); return; }
+            let csv = "No;Tanggal;NIS;Nama Siswa / Subjek;Keterangan;Pemasukan (Rp);Pengeluaran (Rp)\n";
+            transactions.forEach((t, index) => {
+                csv += `${index + 1};"${t.date}";"${t.nis}";"${t.name}";"${t.desc}";${t.in};${t.out}\n`;
+            });
+
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", `Jurnal_Kas_Kelas_VIII_E.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportWeeklyIuranToExcel() {
+            if (!(isAdmin && !isWaliKelas)) { alert("Download dokumen hanya untuk Bendahara/Admin yang diberi hak download."); return; }
+            const selectedMonthKey = document.getElementById('month-filter').value;
+            const selectEl = document.getElementById('month-filter');
+            const selectedMonthLabel = selectEl.options[selectEl.selectedIndex] ? selectEl.options[selectEl.selectedIndex].text : "-";
+
+            let csv = `Rekap Iuran Siswa Kelas VIII E - Periode: ${selectedMonthLabel}\n`;
+            csv += "No;NIS;Nama Siswa;Minggu 1;Minggu 2;Minggu 3;Minggu 4;Total Bayar\n";
+
+            const studentsOnly = masterStudents.filter(s => s.nis !== "-");
+
+            studentsOnly.forEach((s, idx) => {
+                let m1 = 0, m2 = 0, m3 = 0, m4 = 0;
+                transactions.forEach(t => {
+                    if (t.nis === s.nis && t.in > 0) {
+                        const my = getMonthYearFromDateStr(t.date);
+                        if (my && my.key === selectedMonthKey) {
+                            const day = parseInt(t.date.split('/')[0], 10);
+                            if (day >= 1 && day <= 7) m1 += t.in;
+                            else if (day >= 8 && day <= 14) m2 += t.in;
+                            else if (day >= 15 && day <= 21) m3 += t.in;
+                            else if (day >= 22) m4 += t.in;
+                        }
+                    }
+                });
+                const total = m1 + m2 + m3 + m4;
+                csv += `${idx + 1};"${s.nis}";"${s.name}";${m1};${m2};${m3};${m4};${total}\n`;
+            });
+
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", `Rekap_Iuran_VIII_E_${selectedMonthKey}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportWeeklyIuranToPDF() {
+            if (!(isAdmin && !isWaliKelas)) { alert("Download dokumen hanya untuk Bendahara/Admin yang diberi hak download."); return; }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+
+            const selectEl = document.getElementById('month-filter');
+            const selectedMonthLabel = selectEl.options[selectEl.selectedIndex] ? selectEl.options[selectEl.selectedIndex].text : "-";
+            const selectedMonthKey = selectEl.value;
+
+            // Judul Dokumen
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(14);
+            doc.text("LAPORAN REKAPITULASI IURAN KAS SISWA", 105, 15, { align: "center" });
+            
+            doc.setFontSize(11);
+            doc.text("SMP NEGERI 15 BALIKPAPAN - KELAS VIII E", 105, 21, { align: "center" });
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9);
+            doc.text(`Wali Kelas: Eko Dainur Utomo Pasi, S.Pd., Gr. (NIP. ${WALI_NIP})`, 105, 26, { align: "center" });
+            doc.text(`Periode: ${selectedMonthLabel}`, 105, 30, { align: "center" });
+
+            doc.setLineWidth(0.5);
+            doc.line(14, 33, 196, 33);
+
+            // Data Tabel
+            const tableBody = [];
+            const studentsOnly = masterStudents.filter(s => s.nis !== "-");
+
+            let totM1 = 0, totM2 = 0, totM3 = 0, totM4 = 0, totGrand = 0;
+
+            studentsOnly.forEach((s, idx) => {
+                let m1 = 0, m2 = 0, m3 = 0, m4 = 0;
+                transactions.forEach(t => {
+                    if (t.nis === s.nis && t.in > 0) {
+                        const my = getMonthYearFromDateStr(t.date);
+                        if (my && my.key === selectedMonthKey) {
+                            const day = parseInt(t.date.split('/')[0], 10);
+                            if (day >= 1 && day <= 7) m1 += t.in;
+                            else if (day >= 8 && day <= 14) m2 += t.in;
+                            else if (day >= 15 && day <= 21) m3 += t.in;
+                            else if (day >= 22) m4 += t.in;
+                        }
+                    }
+                });
+
+                const total = m1 + m2 + m3 + m4;
+                totM1 += m1; totM2 += m2; totM3 += m3; totM4 += m4; totGrand += total;
+
+                tableBody.push([
+                    idx + 1,
+                    s.nis,
+                    s.name,
+                    m1 > 0 ? formatRp(m1) : "-",
+                    m2 > 0 ? formatRp(m2) : "-",
+                    m3 > 0 ? formatRp(m3) : "-",
+                    m4 > 0 ? formatRp(m4) : "-",
+                    total > 0 ? formatRp(total) : "-"
+                ]);
+            });
+
+            // Baris Total
+            tableBody.push([
+                "", "", "TOTAL KESELURUHAN",
+                formatRp(totM1), formatRp(totM2), formatRp(totM3), formatRp(totM4), formatRp(totGrand)
+            ]);
+
+            doc.autoTable({
+                startY: 36,
+                head: [['No', 'NIS', 'Nama Siswa', 'Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4', 'Total Bayar']],
+                body: tableBody,
+                theme: 'striped',
+                headStyles: { fillColor: [15, 118, 110], textColor: 255, fontSize: 8, halign: 'center' },
+                bodyStyles: { fontSize: 7, cellPadding: 2 },
+                columnStyles: {
+                    0: { halign: 'center', cellWidth: 8 },
+                    1: { halign: 'center', cellWidth: 14 },
+                    2: { cellWidth: 60 },
+                    3: { halign: 'right' },
+                    4: { halign: 'right' },
+                    5: { halign: 'right' },
+                    6: { halign: 'right' },
+                    7: { halign: 'right', fontStyle: 'bold' }
+                },
+                didParseCell: function(data) {
+                    if (data.row.index === tableBody.length - 1) {
+                        data.cell.styles.fontStyle = 'bold';
+                        data.cell.styles.fillColor = [240, 253, 244];
+                    }
+                }
+            });
+
+            // Tanda Tangan
+            const finalY = doc.lastAutoTable.finalY + 10;
+            const today = new Date();
+            const dateStr = `Balikpapan, ${today.getDate()} ${monthNamesIndo[today.getMonth()]} ${today.getFullYear()}`;
+
+            if (finalY + 30 < 280) {
+                doc.setFontSize(8);
+                doc.text(dateStr, 140, finalY);
+                doc.text("Wali Kelas VIII E", 140, finalY + 5);
+                doc.text("Eko Dainur Utomo Pasi, S.Pd., Gr.", 140, finalY + 25);
+                doc.text(`NIP. ${WALI_NIP}`, 140, finalY + 29);
+            }
+
+            doc.save(`Rekap_Iuran_VIII_E_${selectedMonthKey}.pdf`);
+        }
+
+        // Inisialisasi Aplikasi Saat Halaman Dimuat
+        window.onload = async function() {
+            // Tunggu autentikasi Firebase agar perangkat lain dapat membaca database
+            // yang dilindungi Rules: auth != null.
+            if (typeof firebaseAuthReady !== 'undefined') {
+                await firebaseAuthReady;
+            }
+
+            // Firebase menjadi sumber data utama saat aplikasi dibuka.
+            if (typeof muatDataDariFirebase === 'function') {
+                await muatDataDariFirebase();
+            }
+
+            initStudentDropdown();
+            updateMonthSelectorOptions();
+            renderKasJournal();
+            renderRekapTable();
+            calculateKPI();
+            updateStudentManagerTable();
+
+            // Set default date di form input ke hari ini
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            document.getElementById('t-date').value = `${yyyy}-${mm}-${dd}`;
+        };
+    </script>
 <script>
-function updateClock(){
-  const d=new Date();
-  document.getElementById("datetime").textContent=
-    d.toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+
-    " • "+d.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"});
-}
-function openApp(url){location.href=url}
-function placeholder(name){alert(name+" belum dihubungkan. Nanti tinggal masukkan link aplikasinya di portal ini.")}
-updateClock();setInterval(updateClock,1000);
+  const STUDENT_KEY = "kas_viiie_students";
+  const ARCHIVE_KEY = "kas_viiie_student_archives";
+  let activeStudents = masterStudents.filter(s => s.nis !== "-").map(s => ({...s}));
+
+  function syncActiveStudentsToMaster() {
+    masterStudents.length = 0;
+    masterStudents.push({ nis: "-", name: "-- Non-Siswa / Pengeluaran Kelas --" });
+    activeStudents.forEach(s => masterStudents.push({ nis: String(s.nis || "-"), name: String(s.name || "").trim() }));
+  }
+
+  function loadActiveStudentsLocal() {
+    try {
+      const raw = localStorage.getItem(STUDENT_KEY);
+      if (raw) {
+        const data = JSON.parse(raw);
+        if (Array.isArray(data) && data.length) {
+          activeStudents = data.filter(s => s && String(s.name || "").trim())
+            .map(s => ({nis:String(s.nis || "-"), name:String(s.name).trim()}));
+          syncActiveStudentsToMaster();
+        }
+      }
+    } catch(e) { console.error("Gagal membaca siswa:", e); }
+  }
+
+  function saveActiveStudentsLocal() {
+    localStorage.setItem(STUDENT_KEY, JSON.stringify(activeStudents));
+    syncActiveStudentsToMaster();
+    initStudentDropdown();
+    updateMonthSelectorOptions();
+    renderRekapTable();
+    updateStudentManagerTable();
+  }
+
+  function getStudentArchives() {
+    try {
+      const a = JSON.parse(localStorage.getItem(ARCHIVE_KEY) || "[]");
+      return Array.isArray(a) ? a : [];
+    } catch(e) { return []; }
+  }
+
+  function saveStudentArchives(a) {
+    localStorage.setItem(ARCHIVE_KEY, JSON.stringify(a));
+    if (typeof simpanArsipSiswaKeFirebase === "function") simpanArsipSiswaKeFirebase(a);
+  }
+
+  function updateDocumentDownloadAccess() {
+    const loggedIn = !!isAdmin;
+    const isWali = !!isWaliKelas;
+    const isBendahara = loggedIn && !isWali;
+
+    // CETAK: Wali Kelas dan Bendahara tetap boleh mencetak.
+    const printIds = ["btn-print-full", "role-print-btn"];
+    printIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle("hidden", !loggedIn);
+    });
+
+    // DOWNLOAD: tidak ditampilkan untuk Wali Kelas.
+    // Pada sistem ini jalur download diberikan kepada Bendahara.
+    const downloadIds = [
+      "student-download-btn",
+      "student-template-btn",
+      "btn-export-excel",
+      "btn-export-iuran-excel",
+      "btn-export-iuran-pdf",
+      "role-report-pdf-btn",
+      "role-report-csv-btn"
+    ];
+    downloadIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle("hidden", !isBendahara);
+    });
+
+    // Main student manager is Wali Kelas only.
+    const studentMain = document.getElementById("btn-student-manager-main");
+    if (studentMain) studentMain.classList.toggle("hidden", !isWali);
+
+    // Dedicated action bar.
+    const bar = document.getElementById("role-action-bar");
+    const info = document.getElementById("role-action-info");
+    const studentRoleBtn = document.getElementById("role-student-btn");
+    if (bar) bar.classList.toggle("hidden", !loggedIn);
+    if (info) info.innerText = loggedIn
+      ? `Akses Pengurus: ${isWali ? "Wali Kelas / Admin" : "Bendahara"}`
+      : "";
+    if (studentRoleBtn) studentRoleBtn.classList.toggle("hidden", !isWali);
+
+    // Manual student button is Wali-only.
+    const manualBtn = document.getElementById("manual-student-btn");
+    if (manualBtn) manualBtn.classList.toggle("hidden", !isWali);
+
+    // Upload is Wali-only.
+    const uploadBtn = document.querySelector('button[onclick="uploadStudentFile()"]');
+    if (uploadBtn) uploadBtn.classList.toggle("hidden", !isWali);
+
+    // Archive controls are Wali-only.
+    ["archive-name-input"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle("hidden", !isWali);
+    });
+    document.querySelectorAll('#student-manager-modal button[onclick="archiveCurrentStudents()"], #student-manager-modal button[onclick="restoreSelectedArchive()"], #student-manager-modal button[onclick="deleteSelectedArchive()"]').forEach(el => {
+      el.classList.toggle("hidden", !isWali);
+    });
+  }
+
+  setTimeout(updateDocumentDownloadAccess, 0);
+
+  function openStudentManager() {
+    if (!isWaliKelas) {
+      alert("Menu Kelola Siswa hanya untuk Wali Kelas/Admin.");
+      return;
+    }
+    updateStudentManagerTable();
+    updateArchiveSelect();
+    updateDocumentDownloadAccess();
+    document.getElementById("student-manager-modal").classList.remove("hidden");
+  }
+
+  function closeStudentManager() {
+    document.getElementById("student-manager-modal").classList.add("hidden");
+  }
+
+  function escapeStudentHtml(v) {
+    return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+  }
+
+  function updateStudentManagerTable() {
+    const tbody = document.getElementById("student-manager-tbody");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+    activeStudents.forEach((s,i) => {
+      tbody.insertAdjacentHTML("beforeend",
+        `<tr class="border-b border-slate-100"><td class="p-2 text-center">${i+1}</td><td class="p-2 text-center font-mono">${escapeStudentHtml(s.nis)}</td><td class="p-2 font-medium">${escapeStudentHtml(s.name)}</td><td class="p-2 text-center"><button type="button" onclick="deleteStudentManual(${i})" class="px-2 py-1 rounded-lg bg-rose-50 text-rose-600 font-bold text-xs hover:bg-rose-100">Hapus</button></td></tr>`);
+    });
+    const label = document.getElementById("student-count-label");
+    if (label) label.innerText = `${activeStudents.length} siswa aktif`;
+  }
+
+  async function deleteStudentManual(index) {
+    if (!isWaliKelas) {
+      alert("Hapus siswa hanya dapat dilakukan oleh Wali Kelas.");
+      return;
+    }
+
+    const student = activeStudents[index];
+    if (!student) return;
+
+    const ok = confirm(`Hapus siswa "${student.name}" (${student.nis}) dari daftar siswa aktif?\n\nData transaksi kas siswa tidak ikut dihapus.`);
+    if (!ok) return;
+
+    // Simpan daftar aktif lama ke arsip sebelum menghapus satu siswa.
+    const ars = getStudentArchives();
+    ars.unshift({
+      id: Date.now(),
+      name: `Arsip sebelum menghapus ${student.name}`,
+      createdAt: new Date().toISOString(),
+      students: activeStudents.map(s => ({...s}))
+    });
+    saveStudentArchives(ars);
+
+    activeStudents.splice(index, 1);
+    saveActiveStudentsLocal();
+
+    if (typeof simpanSiswaKeFirebase === "function") {
+      await simpanSiswaKeFirebase();
+    }
+
+    updateArchiveSelect();
+    updateStudentManagerTable();
+    alert(`✅ ${student.name} sudah dihapus dari daftar siswa aktif.\nData transaksi kas tetap tersimpan.`);
+  }
+
+  async function addStudentManual() {
+    if (!isWaliKelas) {
+      alert("Tambah siswa hanya dapat dilakukan oleh Wali Kelas.");
+      return;
+    }
+
+    const nis = document.getElementById("manual-student-nis").value.trim();
+    const name = document.getElementById("manual-student-name").value.trim();
+    const msg = document.getElementById("manual-student-msg");
+
+    if (!nis || !name) {
+      msg.innerText = "⚠️ NIS dan nama siswa wajib diisi.";
+      msg.className = "text-xs mt-2 text-rose-600 font-bold";
+      msg.classList.remove("hidden");
+      return;
+    }
+
+    if (activeStudents.some(s => String(s.nis).trim() === nis)) {
+      msg.innerText = "⚠️ NIS tersebut sudah terdaftar.";
+      msg.className = "text-xs mt-2 text-rose-600 font-bold";
+      msg.classList.remove("hidden");
+      return;
+    }
+
+    activeStudents.push({ nis, name });
+    saveActiveStudentsLocal();
+
+    if (typeof simpanSiswaKeFirebase === "function") {
+      await simpanSiswaKeFirebase();
+    }
+
+    updateStudentManagerTable();
+    msg.innerText = `✅ ${name} berhasil ditambahkan.`;
+    msg.className = "text-xs mt-2 text-emerald-700 font-bold";
+    msg.classList.remove("hidden");
+
+    document.getElementById("manual-student-nis").value = "";
+    document.getElementById("manual-student-name").value = "";
+  }
+
+  function parseStudentCSV(text) {
+    const rows = text.replace(/^\uFEFF/,"").split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+    const out = [];
+    rows.forEach(line => {
+      const cols = line.includes(";") ? line.split(";") : (line.includes("\t") ? line.split("\t") : line.split(","));
+      const c = cols.map(x=>x.trim().replace(/^"|"$/g,""));
+      if (c.length < 2) return;
+      const all = c.join(" ").toLowerCase();
+      if (all.includes("nis") && all.includes("nama")) return;
+      if (/^(no|nomor)$/i.test(c[0])) return;
+      let nis, name;
+      if (c.length >= 3 && /^\d+$/.test(c[0])) { nis=c[1]; name=c.slice(2).join(" "); }
+      else { nis=c[0]; name=c.slice(1).join(" "); }
+      if (name.trim()) out.push({nis:nis || "-", name:name.trim()});
+    });
+    return out;
+  }
+
+  async function uploadStudentFile() {
+    if (!isWaliKelas) {
+      alert("Upload nama siswa hanya untuk Wali Kelas/Admin.");
+      return;
+    }
+
+    const file = document.getElementById("student-file-input").files[0];
+    if (!file) {
+      alert("Pilih file Excel atau CSV terlebih dahulu.");
+      return;
+    }
+
+    try {
+      let parsed = [];
+
+      if (/\.(xlsx|xls)$/i.test(file.name)) {
+        if (typeof XLSX === "undefined") {
+          throw new Error("Library Excel belum tersedia. Pastikan perangkat terhubung ke internet.");
+        }
+
+        const buffer = await file.arrayBuffer();
+        const workbook = XLSX.read(buffer, { type: "array" });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+
+        // Ambil baris sebagai array agar format Excel fleksibel.
+        const rows = XLSX.utils.sheet_to_json(firstSheet, {
+          header: 1,
+          defval: ""
+        });
+
+        const lines = rows
+          .map(row => row.map(cell => String(cell ?? "").trim()))
+          .filter(row => row.some(cell => cell !== ""));
+
+        if (lines.length) {
+          // Deteksi header NIS/Nama bila tersedia.
+          const header = lines[0].map(x => x.toLowerCase().replace(/\s+/g, " ").trim());
+          const nisIndex = header.findIndex(x => x === "nis" || x.includes("nis"));
+          const nameIndex = header.findIndex(x => x.includes("nama"));
+
+          if (nisIndex >= 0 && nameIndex >= 0) {
+            parsed = lines.slice(1)
+              .map(row => ({
+                nis: String(row[nisIndex] ?? "").trim() || "-",
+                name: String(row[nameIndex] ?? "").trim()
+              }))
+              .filter(s => s.name);
+          } else {
+            // Jika tanpa header:
+            // No | NIS | Nama, atau NIS | Nama.
+            parsed = lines.map(row => {
+              if (row.length >= 3 && /^\d+$/.test(row[0])) {
+                return { nis: String(row[1]).trim() || "-", name: String(row.slice(2).join(" ")).trim() };
+              }
+              return { nis: String(row[0]).trim() || "-", name: String(row.slice(1).join(" ")).trim() };
+            }).filter(s => s.name);
+          }
+        }
+      } else {
+        // CSV/TXT tetap didukung.
+        parsed = parseStudentCSV(await file.text());
+      }
+
+      if (!parsed.length) {
+        alert("Data siswa tidak terbaca. Pastikan Excel memiliki kolom NIS dan Nama Siswa.");
+        return;
+      }
+
+      // Hilangkan duplikat.
+      const unique = new Map();
+      parsed.forEach(s => {
+        const nis = String(s.nis || "-").trim();
+        const name = String(s.name || "").trim();
+        if (name) unique.set(`${nis}|${name.toLowerCase()}`, { nis, name });
+      });
+
+      parsed = Array.from(unique.values());
+
+      // Arsipkan daftar lama otomatis sebelum diganti.
+      if (activeStudents.length) {
+        const ars = getStudentArchives();
+        ars.unshift({
+          id: Date.now(),
+          name: `Arsip otomatis sebelum upload ${new Date().toLocaleDateString("id-ID")}`,
+          createdAt: new Date().toISOString(),
+          students: activeStudents.map(s => ({...s}))
+        });
+        saveStudentArchives(ars);
+      }
+
+      activeStudents = parsed;
+      saveActiveStudentsLocal();
+
+      if (typeof simpanSiswaKeFirebase === "function") {
+        await simpanSiswaKeFirebase();
+      }
+
+      const msg = document.getElementById("student-upload-msg");
+      msg.innerText = `✅ ${activeStudents.length} siswa berhasil diupload dari ${file.name}. Daftar lama otomatis diarsipkan.`;
+      msg.className = "text-xs mt-2 text-emerald-600 font-bold";
+      msg.classList.remove("hidden");
+
+      updateArchiveSelect();
+      document.getElementById("student-file-input").value = "";
+    } catch (e) {
+      console.error(e);
+      alert("Gagal membaca file Excel/CSV. Pastikan file tidak rusak.");
+    }
+  }
+
+  function archiveCurrentStudents() {
+    if (!isWaliKelas) { alert("Arsip hanya dapat dibuat oleh Wali Kelas."); return; }
+    if (!activeStudents.length) { alert("Tidak ada siswa aktif."); return; }
+
+    const name = document.getElementById("archive-name-input").value.trim() ||
+      `Arsip ${new Date().toLocaleDateString("id-ID")}`;
+    const ars = getStudentArchives();
+    ars.unshift({id:Date.now(), name, createdAt:new Date().toISOString(), students:activeStudents.map(s=>({...s}))});
+    saveStudentArchives(ars);
+    document.getElementById("archive-name-input").value = "";
+    updateArchiveSelect();
+    alert("✅ Daftar siswa berhasil diarsipkan.");
+  }
+
+  function updateArchiveSelect() {
+    const select = document.getElementById("student-archive-select");
+    if (!select) return;
+    select.innerHTML = '<option value="">-- Pilih Arsip --</option>';
+    getStudentArchives().forEach(a => {
+      const opt=document.createElement("option");
+      opt.value=String(a.id);
+      opt.textContent=`${a.name} • ${a.students.length} siswa`;
+      select.appendChild(opt);
+    });
+    showSelectedArchive();
+  }
+
+  function showSelectedArchive() {
+    const id=document.getElementById("student-archive-select").value;
+    const p=document.getElementById("archive-preview");
+    if (!id) { p.innerText=""; return; }
+    const a=getStudentArchives().find(x=>String(x.id)===String(id));
+    if (a) p.innerText=`${a.name}: ${a.students.length} siswa tersimpan.`;
+  }
+
+  async function restoreSelectedArchive() {
+    if (!isWaliKelas) { alert("Pemulihan arsip hanya dapat dilakukan oleh Wali Kelas."); return; }
+    const id=document.getElementById("student-archive-select").value;
+    const a=getStudentArchives().find(x=>String(x.id)===String(id));
+    if (!a) { alert("Pilih arsip terlebih dahulu."); return; }
+    if (!confirm(`Pulihkan "${a.name}" sebagai daftar siswa aktif?`)) return;
+
+    activeStudents=a.students.map(s=>({nis:String(s.nis||"-"),name:String(s.name||"")})).filter(s=>s.name);
+    saveActiveStudentsLocal();
+    if (typeof simpanSiswaKeFirebase === "function") await simpanSiswaKeFirebase();
+    alert("✅ Daftar siswa berhasil dipulihkan.");
+  }
+
+  function deleteSelectedArchive() {
+    if (!isWaliKelas) { alert("Penghapusan arsip hanya dapat dilakukan oleh Wali Kelas."); return; }
+    const id=document.getElementById("student-archive-select").value;
+    if (!id) { alert("Pilih arsip terlebih dahulu."); return; }
+    const a=getStudentArchives().find(x=>String(x.id)===String(id));
+    if (!a || !confirm(`Hapus arsip "${a.name}"?`)) return;
+    saveStudentArchives(getStudentArchives().filter(x=>String(x.id)!==String(id)));
+    updateArchiveSelect();
+  }
+
+  function downloadStudentCSV(students, filename) {
+    let csv="No;NIS;Nama Siswa\n";
+    students.forEach((s,i)=>csv+=`${i+1};"${String(s.nis).replace(/"/g,'""')}";"${String(s.name).replace(/"/g,'""')}"\n`);
+    const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+    const link=document.createElement("a");
+    link.href=URL.createObjectURL(blob); link.download=filename;
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  }
+
+  function downloadCurrentStudents() { if (!(isAdmin && !isWaliKelas)) { alert("Download dokumen hanya untuk Bendahara/Admin yang diberi hak download."); return; } downloadStudentCSV(activeStudents,"Daftar_Siswa_Aktif_VIII_E.csv"); }
+  function downloadStudentTemplate() {
+    if (!(isAdmin && !isWaliKelas)) { alert("Download dokumen hanya untuk Bendahara/Admin yang diberi hak download."); return; }
+    downloadStudentCSV([{nis:"6251",name:"Contoh Nama Siswa 1"},{nis:"6252",name:"Contoh Nama Siswa 2"}],"Template_Upload_Nama_Siswa.csv");
+  }
+
+  loadActiveStudentsLocal();
 </script>
+<!-- Script Firebase Kas Kelas 8E (Sinkronisasi Aman & Terarah) -->
+<script>
+  // ================================================================
+  // FIREBASE AUTH: LOGIN ANONIM OTOMATIS
+  // ================================================================
+  // CATATAN: Ganti nilai FIREBASE_API_KEY dengan Web API Key dari
+  // Firebase Console > Project settings > General > Your apps > Config.
+  // Anonymous Authentication juga harus diaktifkan di:
+  // Authentication > Sign-in method > Anonymous > Enable.
+  const FIREBASE_API_KEY = "AIzaSyBv5hVGQts3w7UAXtS0mhYiQwIXEN9fk_0";
+  const FIREBASE_PROJECT_ID = "kas-kelas-8e";
+  const FIREBASE_AUTH_DOMAIN = FIREBASE_PROJECT_ID + ".firebaseapp.com";
+
+  let firebaseUser = null;
+  let firebaseAuthReadyResolve;
+  let firebaseAuthReadyReject;
+  const firebaseAuthReady = new Promise((resolve, reject) => {
+    firebaseAuthReadyResolve = resolve;
+    firebaseAuthReadyReject = reject;
+  });
+
+  async function initFirebaseAuth() {
+    try {
+      if (FIREBASE_API_KEY === "GANTI_DENGAN_WEB_API_KEY_FIREBASE") {
+        throw new Error("Web API Key Firebase belum diisi.");
+      }
+
+      if (!firebase.apps.length) {
+        firebase.initializeApp({
+          apiKey: FIREBASE_API_KEY,
+          authDomain: FIREBASE_AUTH_DOMAIN,
+          projectId: FIREBASE_PROJECT_ID
+        });
+      }
+
+      firebase.auth().onAuthStateChanged(async (user) => {
+        if (user) {
+          firebaseUser = user;
+          firebaseAuthReadyResolve(user);
+          console.log("Firebase Auth siap:", user.uid);
+        }
+      });
+
+      if (!firebase.auth().currentUser) {
+        await firebase.auth().signInAnonymously();
+      }
+    } catch (err) {
+      console.error("Firebase Auth gagal:", err);
+      firebaseAuthReadyReject(err);
+      alert("Koneksi database belum siap. Pastikan Anonymous Authentication Firebase sudah diaktifkan dan Web API Key sudah benar.");
+    }
+  }
+
+  async function getFirebaseAuthedUrl(baseUrl = FIREBASE_URL) {
+    if (!firebase.auth().currentUser) {
+      await firebase.auth().signInAnonymously();
+    }
+    const token = await firebase.auth().currentUser.getIdToken(true);
+    return baseUrl + (baseUrl.includes("?") ? "&" : "?") + "auth=" + encodeURIComponent(token);
+  }
+
+  initFirebaseAuth();
+
+  const FIREBASE_URL = "https://kas-kelas-8e-default-rtdb.asia-southeast1.firebasedatabase.app/kas_kelas_full.json";
+
+  // Hanya data aplikasi ini yang disinkronkan.
+  const FIREBASE_KEYS = {
+    data: "kas_viiie_data",
+    treasurers: "kas_viiie_treasurers",
+    pin: "kas_viiie_pin"
+  };
+
+  let firebaseReady = false;
+  let firebaseSyncInProgress = false;
+  const FIREBASE_STUDENT_KEY = "kas_viiie_students";
+  const FIREBASE_ARCHIVE_KEY = "kas_viiie_student_archives";
+
+  async function simpanSiswaKeFirebase() {
+    try {
+      const url = await getFirebaseAuthedUrl();
+      const response = await fetch(url, {
+        method:"PATCH", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({[FIREBASE_STUDENT_KEY]:activeStudents})
+      });
+      if (!response.ok) throw new Error("HTTP "+response.status);
+    } catch(e) { console.error("Gagal simpan siswa:",e); }
+  }
+
+  async function simpanArsipSiswaKeFirebase(archives) {
+    try {
+      const url = await getFirebaseAuthedUrl();
+      const response = await fetch(url, {
+        method:"PATCH", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({[FIREBASE_ARCHIVE_KEY]:archives})
+      });
+      if (!response.ok) throw new Error("HTTP "+response.status);
+    } catch(e) { console.error("Gagal simpan arsip:",e); }
+  }
+
+  function jsonStringifySafe(value) {
+    return JSON.stringify(value);
+  }
+
+  async function muatDataDariFirebase() {
+    try {
+      const url = await getFirebaseAuthedUrl();
+      const response = await fetch(url, { cache: "no-store" });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+
+      const dataFirebase = await response.json();
+
+      if (dataFirebase && typeof dataFirebase === "object") {
+        if (Object.prototype.hasOwnProperty.call(dataFirebase, FIREBASE_KEYS.data)) {
+          const cloudData = Array.isArray(dataFirebase[FIREBASE_KEYS.data])
+            ? dataFirebase[FIREBASE_KEYS.data] : [];
+          localStorage.setItem(FIREBASE_KEYS.data, jsonStringifySafe(cloudData));
+          transactions = cloudData;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(dataFirebase, FIREBASE_KEYS.treasurers)) {
+          const cloudTreasurers = Array.isArray(dataFirebase[FIREBASE_KEYS.treasurers])
+            ? dataFirebase[FIREBASE_KEYS.treasurers] : [];
+          localStorage.setItem(FIREBASE_KEYS.treasurers, jsonStringifySafe(cloudTreasurers));
+          activeTreasurers = cloudTreasurers;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(dataFirebase, FIREBASE_KEYS.pin)) {
+          const cloudPin = String(dataFirebase[FIREBASE_KEYS.pin] ?? "");
+          if (cloudPin) {
+            localStorage.setItem(FIREBASE_KEYS.pin, cloudPin);
+            currentPin = cloudPin;
+          }
+        }
+      }
+
+      if (Object.prototype.hasOwnProperty.call(dataFirebase, FIREBASE_STUDENT_KEY)) {
+        const cloudStudents = Array.isArray(dataFirebase[FIREBASE_STUDENT_KEY]) ? dataFirebase[FIREBASE_STUDENT_KEY] : [];
+        if (cloudStudents.length) {
+          activeStudents = cloudStudents.filter(s=>s && String(s.name||"").trim())
+            .map(s=>({nis:String(s.nis||"-"),name:String(s.name).trim()}));
+          localStorage.setItem(STUDENT_KEY, JSON.stringify(activeStudents));
+          syncActiveStudentsToMaster();
+        }
+      }
+
+      if (Object.prototype.hasOwnProperty.call(dataFirebase, FIREBASE_ARCHIVE_KEY)) {
+        const cloudArchives = Array.isArray(dataFirebase[FIREBASE_ARCHIVE_KEY]) ? dataFirebase[FIREBASE_ARCHIVE_KEY] : [];
+        localStorage.setItem(ARCHIVE_KEY, JSON.stringify(cloudArchives));
+      }
+
+      firebaseReady = true;
+      console.log("Firebase siap. Data cloud dimuat.");
+    } catch (err) {
+      firebaseReady = false;
+      console.error("Gagal mengambil data dari Firebase. Aplikasi menggunakan data lokal:", err);
+    }
+  }
+
+  async function simpanDataKeFirebase() {
+    if (firebaseSyncInProgress) return;
+    firebaseSyncInProgress = true;
+    try {
+      const url = await getFirebaseAuthedUrl();
+      const payload = {[FIREBASE_KEYS.data]: transactions};
+      const response = await fetch(url, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      firebaseReady = true;
+    } catch (err) {
+      console.error("Gagal menyimpan transaksi ke Firebase:", err);
+    } finally {
+      firebaseSyncInProgress = false;
+    }
+  }
+
+  async function simpanBendaharaKeFirebase() {
+    try {
+      const url = await getFirebaseAuthedUrl();
+      const response = await fetch(url, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({[FIREBASE_KEYS.treasurers]: activeTreasurers})
+      });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+    } catch (err) { console.error("Gagal menyimpan bendahara ke Firebase:", err); }
+  }
+
+  async function simpanPinKeFirebase() {
+    try {
+      const url = await getFirebaseAuthedUrl();
+      const response = await fetch(url, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({[FIREBASE_KEYS.pin]: currentPin})
+      });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+    } catch (err) { console.error("Gagal menyimpan PIN ke Firebase:", err); }
+  }
+
+  // Realtime stream memakai token Firebase Auth.
+  let eventSource = null;
+  async function startFirebaseRealtime() {
+    try {
+      const url = await getFirebaseAuthedUrl();
+      if (eventSource) eventSource.close();
+      eventSource = new EventSource(url);
+
+      eventSource.onmessage = function(event) {
+        try {
+          const data = JSON.parse(event.data);
+          if (!data || typeof data !== "object") return;
+          let changed = false;
+
+          if (Object.prototype.hasOwnProperty.call(data, FIREBASE_KEYS.data)) {
+            const cloudData = Array.isArray(data[FIREBASE_KEYS.data]) ? data[FIREBASE_KEYS.data] : [];
+            const newData = JSON.stringify(cloudData);
+            if (localStorage.getItem(FIREBASE_KEYS.data) !== newData) {
+              localStorage.setItem(FIREBASE_KEYS.data, newData);
+              transactions = cloudData; changed = true;
+            }
+          }
+
+          if (Object.prototype.hasOwnProperty.call(data, FIREBASE_KEYS.treasurers)) {
+            const cloudTreasurers = Array.isArray(data[FIREBASE_KEYS.treasurers]) ? data[FIREBASE_KEYS.treasurers] : [];
+            const newTreasurers = JSON.stringify(cloudTreasurers);
+            if (localStorage.getItem(FIREBASE_KEYS.treasurers) !== newTreasurers) {
+              localStorage.setItem(FIREBASE_KEYS.treasurers, newTreasurers);
+              activeTreasurers = cloudTreasurers; changed = true;
+            }
+          }
+
+          if (Object.prototype.hasOwnProperty.call(data, FIREBASE_KEYS.pin)) {
+            const cloudPin = String(data[FIREBASE_KEYS.pin] ?? "");
+            if (cloudPin && localStorage.getItem(FIREBASE_KEYS.pin) !== cloudPin) {
+              localStorage.setItem(FIREBASE_KEYS.pin, cloudPin); currentPin = cloudPin;
+            }
+          }
+
+          if (Object.prototype.hasOwnProperty.call(data, FIREBASE_STUDENT_KEY)) {
+            const cloudStudents = Array.isArray(data[FIREBASE_STUDENT_KEY]) ? data[FIREBASE_STUDENT_KEY] : [];
+            const newStudents = JSON.stringify(cloudStudents);
+            if (localStorage.getItem(STUDENT_KEY) !== newStudents) {
+              localStorage.setItem(STUDENT_KEY, newStudents);
+              activeStudents = cloudStudents.filter(s=>s && String(s.name||"").trim())
+                .map(s=>({nis:String(s.nis||"-"),name:String(s.name).trim()}));
+              syncActiveStudentsToMaster(); changed = true;
+            }
+          }
+
+          if (Object.prototype.hasOwnProperty.call(data, FIREBASE_ARCHIVE_KEY)) {
+            const cloudArchives = Array.isArray(data[FIREBASE_ARCHIVE_KEY]) ? data[FIREBASE_ARCHIVE_KEY] : [];
+            localStorage.setItem(ARCHIVE_KEY, JSON.stringify(cloudArchives));
+            if (document.getElementById("student-manager-modal") && !document.getElementById("student-manager-modal").classList.contains("hidden")) updateArchiveSelect();
+          }
+
+          if (changed && typeof updateMonthSelectorOptions === "function") {
+            updateMonthSelectorOptions(); renderKasJournal(); renderRekapTable(); calculateKPI();
+            if (typeof updateStudentManagerTable === "function") updateStudentManagerTable();
+          }
+        } catch (err) { console.error("Realtime Firebase error:", err); }
+      };
+
+      eventSource.onerror = function() {
+        console.warn("Realtime Firebase terputus. Mencoba autentikasi ulang...");
+        setTimeout(startFirebaseRealtime, 3000);
+      };
+    } catch (err) { console.error("Gagal memulai realtime Firebase:", err); }
+  }
+
+  firebaseAuthReady.then(() => startFirebaseRealtime()).catch(()=>{});
+</script>
+
 </body>
 </html>
