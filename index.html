@@ -1622,16 +1622,26 @@
           const cloudData = Array.isArray(dataFirebase[FIREBASE_KEYS.data])
             ? dataFirebase[FIREBASE_KEYS.data]
             : [];
-          localStorage.setItem(FIREBASE_KEYS.data, jsonStringifySafe(cloudData));
-          transactions = cloudData;
+          if (cloudData.length > 0 || transactions.length === 0) {
+            localStorage.setItem(FIREBASE_KEYS.data, jsonStringifySafe(cloudData));
+            transactions = cloudData;
+          } else {
+            console.warn("Cloud kas kosong, data lokal dipertahankan.");
+            setTimeout(() => simpanDataKeFirebase(), 0);
+          }
         }
 
         if (Object.prototype.hasOwnProperty.call(dataFirebase, FIREBASE_KEYS.treasurers)) {
           const cloudTreasurers = Array.isArray(dataFirebase[FIREBASE_KEYS.treasurers])
             ? dataFirebase[FIREBASE_KEYS.treasurers]
             : [];
-          localStorage.setItem(FIREBASE_KEYS.treasurers, jsonStringifySafe(cloudTreasurers));
-          activeTreasurers = cloudTreasurers;
+          if (cloudTreasurers.length > 0 || activeTreasurers.length === 0) {
+            localStorage.setItem(FIREBASE_KEYS.treasurers, jsonStringifySafe(cloudTreasurers));
+            activeTreasurers = cloudTreasurers;
+          } else {
+            console.warn("Cloud bendahara kosong, daftar lokal dipertahankan.");
+            setTimeout(() => simpanBendaharaKeFirebase(), 0);
+          }
         }
 
         if (Object.prototype.hasOwnProperty.call(dataFirebase, FIREBASE_KEYS.pin)) {
@@ -1646,12 +1656,16 @@
 
       if (Object.prototype.hasOwnProperty.call(dataFirebase, FIREBASE_STUDENT_KEY)) {
         const cloudStudents = Array.isArray(dataFirebase[FIREBASE_STUDENT_KEY]) ? dataFirebase[FIREBASE_STUDENT_KEY] : [];
-        if (cloudStudents.length) {
+        if (cloudStudents.length > 0) {
           activeStudents = cloudStudents.filter(s=>s && String(s.name||"").trim())
             .map(s=>({nis:String(s.nis||"-"),name:String(s.name).trim()}));
           localStorage.setItem(STUDENT_KEY, JSON.stringify(activeStudents));
           syncActiveStudentsToMaster();
+        } else if (activeStudents.length > 0) {
+          setTimeout(() => simpanSiswaKeFirebase(), 0);
         }
+      } else if (activeStudents.length > 0) {
+        setTimeout(() => simpanSiswaKeFirebase(), 0);
       }
 
       if (Object.prototype.hasOwnProperty.call(dataFirebase, FIREBASE_ARCHIVE_KEY)) {
@@ -1745,14 +1759,17 @@
           const cloudData = Array.isArray(data[FIREBASE_KEYS.data])
             ? data[FIREBASE_KEYS.data]
             : [];
-
           const oldData = localStorage.getItem(FIREBASE_KEYS.data);
+          const localData = Array.isArray(transactions) ? transactions : [];
           const newData = JSON.stringify(cloudData);
-
-          if (oldData !== newData) {
-            localStorage.setItem(FIREBASE_KEYS.data, newData);
-            transactions = cloudData;
-            changed = true;
+          if (cloudData.length > 0 || localData.length === 0) {
+            if (oldData !== newData) {
+              localStorage.setItem(FIREBASE_KEYS.data, newData);
+              transactions = cloudData;
+              changed = true;
+            }
+          } else {
+            setTimeout(() => simpanDataKeFirebase(), 0);
           }
         }
 
@@ -1781,13 +1798,19 @@
         if (Object.prototype.hasOwnProperty.call(data, FIREBASE_STUDENT_KEY)) {
           const cloudRealtimeStudents = Array.isArray(data[FIREBASE_STUDENT_KEY]) ? data[FIREBASE_STUDENT_KEY] : [];
           const newStudents = JSON.stringify(cloudRealtimeStudents);
-          if (localStorage.getItem(STUDENT_KEY) !== newStudents) {
-            localStorage.setItem(STUDENT_KEY, newStudents);
-            activeStudents = cloudRealtimeStudents.filter(s=>s && String(s.name||"").trim())
-              .map(s=>({nis:String(s.nis||"-"),name:String(s.name).trim()}));
-            syncActiveStudentsToMaster();
-            changed = true;
+          if (cloudRealtimeStudents.length > 0) {
+            if (localStorage.getItem(STUDENT_KEY) !== newStudents) {
+              localStorage.setItem(STUDENT_KEY, newStudents);
+              activeStudents = cloudRealtimeStudents.filter(s=>s && String(s.name||"").trim())
+                .map(s=>({nis:String(s.nis||"-"),name:String(s.name).trim()}));
+              syncActiveStudentsToMaster();
+              changed = true;
+            }
+          } else if (activeStudents.length > 0) {
+            setTimeout(() => simpanSiswaKeFirebase(), 0);
           }
+        } else if (activeStudents.length > 0) {
+          setTimeout(() => simpanSiswaKeFirebase(), 0);
         }
 
         if (Object.prototype.hasOwnProperty.call(data, FIREBASE_ARCHIVE_KEY)) {
